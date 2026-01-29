@@ -62,7 +62,8 @@ class CCodeGenerator:
             elif isinstance(val, str):
                 return "string"
         elif isinstance(expr, Identifier):
-            return self.get_symbol_type(expr.name)
+            result = self.get_symbol_type(expr.name)
+            return result
         elif isinstance(expr, NewInstance):
             return expr.class_name
         elif isinstance(expr, ThisClass):
@@ -71,6 +72,28 @@ class CCodeGenerator:
             # Try to infer return type from method signature
             if expr.object:
                 obj_type = self.infer_expression_type(expr.object)
+                
+                # Special handling for array transformation methods
+                if obj_type and '[]' in obj_type:
+                    if expr.method_name == 'map':
+                        # map returns same array type
+                        return obj_type
+                    elif expr.method_name == 'filter':
+                        # filter returns same array type
+                        return obj_type
+                    elif expr.method_name == 'sort':
+                        # sort returns same array type
+                        return obj_type
+                    elif expr.method_name == 'unique':
+                        # unique returns same array type
+                        return obj_type
+                    elif expr.method_name == 'reduce':
+                        # reduce returns the element type (not array)
+                        return obj_type.replace('[]', '')
+                    elif expr.method_name == 'find':
+                        # find returns the element type
+                        return obj_type.replace('[]', '')
+                
                 if obj_type and (obj_type, expr.method_name) in self.method_signatures:
                     return self.method_signatures[(obj_type, expr.method_name)]
             return None
@@ -108,8 +131,15 @@ class CCodeGenerator:
     
     def collect_lambdas_from_statement(self, stmt: Statement):
         """Recursively collect lambdas from a statement"""
-        if isinstance(stmt, VarDecl) and stmt.initial_value:
-            self.collect_lambdas_from_expression(stmt.initial_value)
+        if isinstance(stmt, VarDecl):
+            # Add variable to symbol table so type inference works
+            type_name = stmt.var_type.name
+            if stmt.var_type.is_array:
+                type_name = type_name + "[]"
+            self.add_symbol(stmt.name, type_name)
+            # Then process its initial value
+            if stmt.initial_value:
+                self.collect_lambdas_from_expression(stmt.initial_value)
         elif isinstance(stmt, ExpressionStmt):
             self.collect_lambdas_from_expression(stmt.expression)
         elif isinstance(stmt, ReturnStmt) and stmt.value:
@@ -129,11 +159,50 @@ class CCodeGenerator:
             self.collect_lambdas_from_expression(stmt.condition)
             self.collect_lambdas_from_block(stmt.body)
     
-    def collect_lambdas_from_expression(self, expr: Expression):
-        """Recursively collect lambdas from an expression"""
+    def collect_lambdas_from_expression(self, expr: Expression, context_type: Optional[str] = None):
+        """Recursively collect lambdas from an expression
+        context_type: The array element type if this expression is in an array operation context
+        """
         if isinstance(expr, Lambda):
-            # Generate the lambda function definition
-            self.generate_lambda_definition(expr)
+            # Generate with context if available, otherwise default to int
+            if context_type:
+                param_type = self.get_c_element_type(context_type)
+                return_type = param_type  # For now, assume same type (works for map)
+                self.generate_lambda_definition(expr, param_type, return_type)
+            else:
+                # Default to int if no context
+                self.generate_lambda_definition(expr, "int", "int")
+        elif isinstance(expr, MethodCall):
+            # Check if this is an array operation - if so, pass context to lambda arguments
+            if expr.object:
+                obj_type = self.infer_expression_type(expr.object)
+                if obj_type and '[]' in obj_type and expr.method_name in ['map', 'filter', 'reduce', 'find']:
+                    base_type = obj_type.replace('[]', '')
+                    # Process lambda arguments with context
+                    for i, arg in enumerate(expr.arguments):
+                        if isinstance(arg, Lambda):
+                            if expr.method_name == 'map':
+                                self.collect_lambdas_from_expression(arg, base_type)
+                            elif expr.method_name == 'filter' or expr.method_name == 'find':
+                                # filter/find: elem_type -> bool
+                                param_type = self.get_c_element_type(base_type)
+                                self.generate_lambda_definition(arg, param_type, "int")
+                            elif expr.method_name == 'reduce' and i == 0:
+                                # reduce: (acc_type, elem_type) -> acc_type
+                                param_type = self.get_c_element_type(base_type)
+                                self.generate_lambda_definition(arg, param_type, param_type)
+                        else:
+                            self.collect_lambdas_from_expression(arg, context_type)
+                    # Process the object too
+                    self.collect_lambdas_from_expression(expr.object, context_type)
+                else:
+                    # Not an array operation, process normally
+                    self.collect_lambdas_from_expression(expr.object, context_type)
+                    for arg in expr.arguments:
+                        self.collect_lambdas_from_expression(arg, context_type)
+            else:
+                for arg in expr.arguments:
+                    self.collect_lambdas_from_expression(arg, context_type)
         elif isinstance(expr, BinaryOp):
             self.collect_lambdas_from_expression(expr.left)
             self.collect_lambdas_from_expression(expr.right)
@@ -156,13 +225,13 @@ class CCodeGenerator:
         elif isinstance(expr, MemberAccess):
             self.collect_lambdas_from_expression(expr.object)
     
-    def generate_lambda_definition(self, expr: Lambda):
-        """Generate a lambda function definition"""
+    def generate_lambda_definition(self, expr: Lambda, param_type: str = "int", return_type: str = "int"):
+        """Generate a lambda function definition with specified types"""
         lambda_name = f"lambda_{self.lambda_counter}"
         self.lambda_counter += 1
         
-        # Assume int return type for now
-        params = ', '.join([f"int {p}" for p in expr.parameters])
+        # Use provided types or default to int
+        params = ', '.join([f"{param_type} {p}" for p in expr.parameters])
         
         # Generate the body expression
         # We need to temporarily generate this to get the C code
@@ -171,11 +240,14 @@ class CCodeGenerator:
         body_expr = self.generate_expression(expr.body)
         self.lambda_generation_mode = saved_mode
         
-        lambda_def = f"static int {lambda_name}({params}) {{\n"
+        lambda_def = f"static {return_type} {lambda_name}({params}) {{\n"
         lambda_def += f"    return {body_expr};\n"
         lambda_def += "}"
         
-        self.generated_lambdas.append(lambda_def)
+        # Insert lambda at the remembered position (after "// Lambda functions" header)
+        self.output.insert(self.lambda_section_index, lambda_def)
+        self.output.insert(self.lambda_section_index + 1, "")
+        self.lambda_section_index += 2  # Account for the lines we just added
         
         # Store the lambda name for later use
         if not hasattr(expr, '_generated_name'):
@@ -210,6 +282,16 @@ class CCodeGenerator:
         # NOW generate forward declarations
         self.emit("// Forward declarations")
         self.emit("bool Main_internal(void);")
+        
+        # Forward declare array types
+        self.emit("typedef struct IntArray_s IntArray;")
+        self.emit("typedef struct FloatArray_s FloatArray;")
+        self.emit("typedef struct LongFloatArray_s LongFloatArray;")
+        self.emit("typedef struct LongIntArray_s LongIntArray;")
+        self.emit("typedef struct BoolArray_s BoolArray;")
+        self.emit("typedef struct CharArray_s CharArray;")
+        self.emit("typedef struct StringArray_s StringArray;")
+        self.emit("")
         
         # Forward declare class types
         for class_name in self.classes:
@@ -270,15 +352,14 @@ class CCodeGenerator:
         self.lambda_forward_decls = []
         self.emit("")
         
-        # Second pass: collect all lambda functions by walking the AST
-        self.collect_all_lambdas(program)
+        # Don't collect lambdas here - do it per-method when symbols are available
+        # self.collect_all_lambdas(program)
         
-        # Generate lambda functions FIRST
-        if self.generated_lambdas:
-            self.emit("// Lambda functions")
-            for lambda_def in self.generated_lambdas:
-                self.emit(lambda_def)
-                self.emit("")
+        # Generate lambda functions section header (lambdas will be added as we find them)
+        self.emit("// Lambda functions")
+        # Placeholder - actual lambdas added during method generation
+        self.lambda_section_index = len(self.output)  # Remember where to insert lambdas
+        self.emit("")
         
         # CONSOLE implementation
         self.generate_console_class()
@@ -335,7 +416,9 @@ class CCodeGenerator:
             base_type = f"{foobar_type.name}*"
         
         if foobar_type.is_array:
-            return f"{base_type}*"
+            # Return the proper array struct type (e.g., FloatArray* instead of float*)
+            array_type = self.get_array_type_name(foobar_type.name)
+            return f"{array_type}*"
         
         return base_type
     
@@ -1034,13 +1117,13 @@ class CCodeGenerator:
     
     def generate_array_helpers(self):
         self.emit("// Array helper structures")
-        self.emit("typedef struct {")
+        self.emit("struct IntArray_s {")
         self.indent()
         self.emit("int* data;")
         self.emit("int length;")
         self.emit("int capacity;")
         self.dedent()
-        self.emit("} IntArray;")
+        self.emit("};")
         self.emit("")
         
         self.emit("IntArray* IntArray_new(int capacity) {")
@@ -1264,13 +1347,13 @@ class CCodeGenerator:
         
         # ==================== FLOAT ARRAY SUPPORT ====================
         self.emit("// FloatArray support (for float[] arrays)")
-        self.emit("typedef struct {")
+        self.emit("struct FloatArray_s {")
         self.indent()
         self.emit("float* data;")
         self.emit("int length;")
         self.emit("int capacity;")
         self.dedent()
-        self.emit("} FloatArray;")
+        self.emit("};")
         self.emit("")
         
         self.emit("FloatArray* FloatArray_new(int capacity) {")
@@ -1317,6 +1400,19 @@ class CCodeGenerator:
         self.emit("result->data[result->length++] = arr->data[i];")
         self.dedent()
         self.emit("}")
+        self.dedent()
+        self.emit("}")
+        self.emit("return result;")
+        self.dedent()
+        self.emit("}")
+        self.emit("")
+        
+        self.emit("float FloatArray_reduce(FloatArray* arr, float (*func)(float, float), float initial) {")
+        self.indent()
+        self.emit("float result = initial;")
+        self.emit("for (int i = 0; i < arr->length; i++) {")
+        self.indent()
+        self.emit("result = func(result, arr->data[i]);")
         self.dedent()
         self.emit("}")
         self.emit("return result;")
@@ -1403,6 +1499,19 @@ class CCodeGenerator:
         self.dedent()
         self.emit("}")
         self.emit("printf(\"]\\n\");")
+        self.dedent()
+        self.emit("}")
+        self.emit("")
+        
+        self.emit("FloatArray* FloatArray_concat(FloatArray* arr1, FloatArray* arr2) {")
+        self.indent()
+        self.emit("if (!arr1) return arr2;")
+        self.emit("if (!arr2) return arr1;")
+        self.emit("FloatArray* result = FloatArray_new(arr1->length + arr2->length);")
+        self.emit("memcpy(result->data, arr1->data, sizeof(float) * arr1->length);")
+        self.emit("memcpy(result->data + arr1->length, arr2->data, sizeof(float) * arr2->length);")
+        self.emit("result->length = arr1->length + arr2->length;")
+        self.emit("return result;")
         self.dedent()
         self.emit("}")
         self.emit("")
@@ -1585,7 +1694,14 @@ class CCodeGenerator:
         self.push_scope()
         self.add_symbol("thisclass", class_name)
         for param in method.parameters:
-            self.add_symbol(param.name, param.param_type.name)
+            # Include [] suffix for array types
+            type_name = param.param_type.name
+            if param.param_type.is_array:
+                type_name = type_name + "[]"
+            self.add_symbol(param.name, type_name)
+        
+        # Collect lambdas for this method
+        self.collect_lambdas_from_block(method.body)
         
         self.generate_block(method.body)
         
@@ -1620,7 +1736,14 @@ class CCodeGenerator:
         # Push new scope and add parameters to symbol table
         self.push_scope()
         for param in method.parameters:
-            self.add_symbol(param.name, param.param_type.name)
+            # Include [] suffix for array types
+            type_name = param.param_type.name
+            if param.param_type.is_array:
+                type_name = type_name + "[]"
+            self.add_symbol(param.name, type_name)
+        
+        # NOW collect lambdas for this method (symbols are available)
+        self.collect_lambdas_from_block(method.body)
         
         self.generate_block(method.body)
         
@@ -1643,6 +1766,10 @@ class CCodeGenerator:
         
         # Push scope for Main
         self.push_scope()
+        
+        # Collect lambdas for Main
+        self.collect_lambdas_from_block(method.body)
+        
         self.generate_block(method.body)
         self.pop_scope()
         
@@ -1673,7 +1800,18 @@ class CCodeGenerator:
                 c_type = f"{stmt.var_type.name}*"
             
             if stmt.initial_value:
-                init_expr = self.generate_expression(stmt.initial_value)
+                # For array literals, we need to pass the expected type context
+                if stmt.var_type.is_array and isinstance(stmt.initial_value, ArrayLiteral):
+                    # Generate array literal with type context
+                    if not stmt.initial_value.elements:
+                        # Empty array - use the declared type
+                        array_type_name = self.get_array_type_name(stmt.var_type.name)
+                        c_elem_type = self.get_c_element_type(stmt.var_type.name)
+                        init_expr = f"{array_type_name}_from_literal(({c_elem_type}[]){{}}, 0)"
+                    else:
+                        init_expr = self.generate_expression(stmt.initial_value)
+                else:
+                    init_expr = self.generate_expression(stmt.initial_value)
                 self.emit(f"{c_type} {stmt.name} = {init_expr};")
             else:
                 self.emit(f"{c_type} {stmt.name};")
@@ -1778,9 +1916,12 @@ class CCodeGenerator:
                     return f"(!string_less_than({left}, {right}))"
             
             # Special handling for array concatenation
-            if (left_type and 'integer[]' in left_type) or (right_type and 'integer[]' in right_type):
+            if (left_type and '[]' in left_type) or (right_type and '[]' in right_type):
                 if expr.operator == '+':
-                    return f"IntArray_concat({left}, {right})"
+                    # Get the base type for the array
+                    base_type = (left_type or right_type).replace('[]', '')
+                    array_type_name = self.get_array_type_name(base_type)
+                    return f"{array_type_name}_concat({left}, {right})"
             
             op_map = {
                 '+': '+',
@@ -1911,12 +2052,32 @@ class CCodeGenerator:
                     # Extract base type from array type (e.g., "integer[]" -> "integer")
                     base_type = obj_type.replace('[]', '')
                     array_type_name = self.get_array_type_name(base_type)
+                    c_elem_type = self.get_c_element_type(base_type)
                     
-                    # Generate lambda functions for arguments
+                    # Get lambda function names for arguments
                     lambda_funcs = []
-                    for arg in expr.arguments:
+                    for i, arg in enumerate(expr.arguments):
                         if isinstance(arg, Lambda):
-                            lambda_funcs.append(self.generate_expression(arg))
+                            # Lambda should already be generated in collection pass
+                            if hasattr(arg, '_generated_name'):
+                                lambda_funcs.append(arg._generated_name)
+                            else:
+                                # Fallback: shouldn't happen but generate if needed
+                                c_elem_type = self.get_c_element_type(base_type)
+                                if expr.method_name == 'map':
+                                    param_type = c_elem_type
+                                    return_type = c_elem_type
+                                elif expr.method_name == 'filter' or expr.method_name == 'find':
+                                    param_type = c_elem_type
+                                    return_type = "int"
+                                elif expr.method_name == 'reduce' and i == 0:
+                                    param_type = c_elem_type
+                                    return_type = c_elem_type
+                                else:
+                                    param_type = "int"
+                                    return_type = "int"
+                                self.generate_lambda_definition(arg, param_type, return_type)
+                                lambda_funcs.append(arg._generated_name)
                         else:
                             lambda_funcs.append(self.generate_expression(arg))
                     
@@ -1976,7 +2137,7 @@ class CCodeGenerator:
             obj = self.generate_expression(expr.object)
             # Check if it's a class instance or array
             obj_type = self.infer_expression_type(expr.object)
-            if obj_type and (obj_type in self.classes or 'integer[]' in obj_type):
+            if obj_type and (obj_type in self.classes or '[]' in obj_type):
                 # Use -> for pointer member access (classes and arrays)
                 return f"{obj}->{expr.member_name}"
             else:
