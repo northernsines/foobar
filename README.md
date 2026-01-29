@@ -206,5 +206,3 @@ You should have received a copy of the GNU General Public License along with thi
 **Sonja Wilberding** - 2026
 
 ---
-
-*FOOBAR: It's your language. It's robust. It's fast.*
