@@ -42,29 +42,32 @@ FOOBAR is designed to be **readable, explicit, and predictable**. It provides th
 ## Quick Example
 
 ```foobar
-class COUNTER {
-    private integer count;
-    
-    public Initialize(integer start) {
-        thisclass.count = start;
+Main()
+{
+    integer[] inputtedNumbers = [];
+    integer index = 1;
+    integer userInput;
+    integer answer;
+    loop until (index == 7)
+    {
+        CONSOLE.Print("What is the " + index.toString() + "th number?");
+        userInput = CONSOLE.ScanInteger();
+        inputtedNumbers = inputtedNumbers + [userInput];
+        index++;
     }
-    
-    public void Increment() {
-        thisclass.count++;
-    }
-}
-
-Main() {
-    COUNTER c = new COUNTER(5);
-    c.Increment();
-    
-    integer[] numbers = [1, 2, 3, 4, 5];
-    integer sum = numbers
-        .filter(x -> x > 2)
-        .reduce((acc, x) -> acc + x, 0);
-    
+    answer = SumEvenNumbers(inputtedNumbers);
+    CONSOLE.Print("The sum of all even numbers entered is " + answer.toString() + ".");
     return true;
 }
+
+integer SumEvenNumbers(integer[] numbers)
+{
+    integer sum = numbers
+        .filter(x -> x % 2 == 0)
+        .reduce((acc, x) -> acc + x, 0);
+    return sum;
+}
+
 ```
 
 ---
@@ -94,7 +97,7 @@ Main() {
    chmod +x compile.sh
    ```
 
-3. Compile and run (easiest way):
+4. Compile and run (easiest way):
    ```bash
    ./compile.sh
    ```
@@ -130,6 +133,7 @@ FOOBAR compiles to C and needs GCC (a C compiler) and Python 3. The easiest way 
 
 *Note for advanced users: You can use MinGW or other Windows C compilers, but you'll need to handle PATH configuration and dependencies yourself. Make sure you have Python 3 installed.*
 
+**Want the wonderful .foob icon?** Simply run the icon_setup.sh script!
 ---
 
 ## VSCode Extension
@@ -202,3 +206,5 @@ You should have received a copy of the GNU General Public License along with thi
 **Sonja Wilberding** - 2026
 
 ---
+
+*FOOBAR: It's your language. It's robust. It's fast.*
