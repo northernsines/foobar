@@ -1,0 +1,38 @@
+// Test isa type checking
+
+class ANIMAL {
+    public void Speak() {
+        CONSOLE.Print("Generic animal sound");
+    }
+}
+
+class DOG inherits ANIMAL {
+    public void Bark() {
+        CONSOLE.Print("Woof!");
+    }
+}
+
+Main() {
+    CONSOLE.Print("Testing isa operator...");
+    
+    DOG myDog = new DOG();
+    ANIMAL myAnimal = new ANIMAL();
+    
+    if(myDog isa DOG) {
+        CONSOLE.Print("myDog is a DOG - correct!");
+    }
+    
+    if(myDog isa ANIMAL) {
+        CONSOLE.Print("myDog is also an ANIMAL - correct!");
+    }
+    
+    if(myAnimal isa ANIMAL) {
+        CONSOLE.Print("myAnimal is an ANIMAL - correct!");
+    }
+    
+    if(not(myAnimal isa DOG)) {
+        CONSOLE.Print("myAnimal is NOT a DOG - correct!");
+    }
+    
+    return true;
+}

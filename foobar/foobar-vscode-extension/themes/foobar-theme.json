@@ -1,0 +1,13 @@
+{
+  "name": "FOOBAR Theme",
+  "type": "dark",
+  "colors": {},
+  "tokenColors": [
+    {
+      "scope": "variable.other.foobar",
+      "settings": {
+        "foreground": "#9CDCFE"
+      }
+    }
+  ]
+}

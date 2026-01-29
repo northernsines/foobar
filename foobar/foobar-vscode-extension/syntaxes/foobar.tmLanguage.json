@@ -1,0 +1,150 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "FOOBAR",
+  "scopeName": "source.foobar",
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#keywords" },
+    { "include": "#types" },
+    { "include": "#constants" },
+    { "include": "#strings" },
+    { "include": "#numbers" },
+    { "include": "#operators" },
+    { "include": "#functions" },
+    { "include": "#classes" },
+    { "include": "#variables" }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.double-slash.foobar",
+          "match": "//.*$"
+        },
+        {
+          "name": "comment.block.foobar",
+          "begin": "/\\*",
+          "end": "\\*/"
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.foobar",
+          "match": "\\b(if|elseif|else|loop|for|until|while|return|break|continue)\\b"
+        },
+        {
+          "name": "keyword.other.foobar",
+          "match": "\\b(class|inherits|public|private|new|thisclass|parent|isa)\\b"
+        },
+        {
+          "name": "storage.modifier.foobar",
+          "match": "\\b(public|private)\\b"
+        }
+      ]
+    },
+    "types": {
+      "patterns": [
+        {
+          "name": "storage.type.foobar",
+          "match": "\\b(boolean|integer|longinteger|float|longfloat|string|character|void)\\b"
+        }
+      ]
+    },
+    "constants": {
+      "patterns": [
+        {
+          "name": "constant.language.foobar",
+          "match": "\\b(true|false|null)\\b"
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.foobar",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape.foobar",
+              "match": "\\\\."
+            }
+          ]
+        },
+        {
+          "name": "string.quoted.single.foobar",
+          "begin": "'",
+          "end": "'",
+          "patterns": [
+            {
+              "name": "constant.character.escape.foobar",
+              "match": "\\\\."
+            }
+          ]
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.foobar",
+          "match": "\\b\\d+\\.?\\d*\\b"
+        }
+      ]
+    },
+    "operators": {
+      "patterns": [
+        {
+          "name": "keyword.operator.arithmetic.foobar",
+          "match": "\\+\\+|\\-\\-|\\+|\\-|\\*|\\/|%|\\^"
+        },
+        {
+          "name": "keyword.operator.comparison.foobar",
+          "match": "==|>=|<=|>|<"
+        },
+        {
+          "name": "keyword.operator.logical.foobar",
+          "match": "&|V|VV|not\\(\\)"
+        },
+        {
+          "name": "keyword.operator.assignment.foobar",
+          "match": "="
+        }
+      ]
+    },
+    "variables": {
+      "patterns": [
+        {
+          "name": "variable.other.foobar",
+          "match": "\\b[a-z][a-zA-Z0-9]*\\b"
+        }
+      ]
+    },
+    "functions": {
+      "patterns": [
+        {
+          "name": "entity.name.function.foobar",
+          "match": "\\b[A-Z][A-Za-z0-9_]*(?=\\s*\\()"
+        },
+        {
+          "name": "entity.name.function.foobar",
+          "match": "\\b(Main|Initialize)\\b"
+        }
+      ]
+    },
+    "classes": {
+      "patterns": [
+        {
+          "name": "entity.name.type.class.foobar",
+          "match": "\\b[A-Z][A-Z0-9_]*\\b"
+        },
+        {
+          "name": "support.class.foobar",
+          "match": "\\b(CONSOLE|MATH|STRING|DATETIME|RANDOM|FILE|ARRAY)\\b"
+        }
+      ]
+    }
+  }
+}

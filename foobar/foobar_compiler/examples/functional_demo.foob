@@ -1,0 +1,81 @@
+// FOOBAR Functional Programming Demo
+// Demonstrates map, filter, reduce, and other array operations
+
+Main() {
+    CONSOLE.Print("=== FOOBAR Functional Programming Demo ===");
+    CONSOLE.Print("");
+    
+    // Create an array
+    CONSOLE.Print("Original array:");
+    integer[] numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    numbers.print();
+    CONSOLE.Print("");
+    
+    // Map: double each number
+    CONSOLE.Print("Map - Double each number:");
+    integer[] doubled = numbers.map(x -> x * 2);
+    doubled.print();
+    CONSOLE.Print("");
+    
+    // Filter: only even numbers
+    CONSOLE.Print("Filter - Only even numbers:");
+    integer[] evens = numbers.filter(x -> x - (x / 2 * 2) == 0);
+    evens.print();
+    CONSOLE.Print("");
+    
+    // Filter: only numbers greater than 5
+    CONSOLE.Print("Filter - Only numbers > 5:");
+    integer[] greaterThanFive = numbers.filter(x -> x > 5);
+    greaterThanFive.print();
+    CONSOLE.Print("");
+    
+    // Reduce: sum all numbers
+    CONSOLE.Print("Reduce - Sum of all numbers:");
+    integer sum = numbers.reduce((acc, x) -> acc + x);
+    CONSOLE.PrintInteger(sum);
+    CONSOLE.Print("");
+    
+    // Reduce: product of all numbers
+    CONSOLE.Print("Reduce - Product of numbers 1-5:");
+    integer[] smallNumbers = [1, 2, 3, 4, 5];
+    integer product = smallNumbers.reduce((acc, x) -> acc * x, 1);
+    CONSOLE.PrintInteger(product);
+    CONSOLE.Print("");
+    
+    // Chain operations
+    CONSOLE.Print("Chained - Filter evens, then double:");
+    integer[] result = numbers
+        .filter(x -> x - (x / 2 * 2) == 0)
+        .map(x -> x * 2);
+    result.print();
+    CONSOLE.Print("");
+    
+    // Sort
+    CONSOLE.Print("Sort - Unsorted array:");
+    integer[] unsorted = [5, 2, 8, 1, 9, 3];
+    unsorted.print();
+    CONSOLE.Print("After sorting:");
+    integer[] sorted = unsorted.sort();
+    sorted.print();
+    CONSOLE.Print("");
+    
+    // Unique
+    CONSOLE.Print("Unique - Array with duplicates:");
+    integer[] withDupes = [1, 2, 2, 3, 3, 3, 4, 5, 5];
+    withDupes.print();
+    CONSOLE.Print("After unique:");
+    integer[] unique = withDupes.unique();
+    unique.print();
+    CONSOLE.Print("");
+    
+    // Find
+    CONSOLE.Print("Find - First number > 7 in [1,2,3,8,9,10]:");
+    integer[] searchArray = [1, 2, 3, 8, 9, 10];
+    integer found = searchArray.find(x -> x > 7);
+    CONSOLE.PrintInteger(found);
+    CONSOLE.Print("");
+    
+    CONSOLE.Print("=== Demo Complete! ===");
+    
+    return true;
+}

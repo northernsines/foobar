@@ -26,9 +26,10 @@ FOOBAR is a statically typed, imperative, object-oriented programming language w
 15. [Control Flow Statements](#15-control-flow-statements)
 16. [Functional Programming Features](#16-functional-programming-features)
 17. [Lambda Expressions](#17-lambda-expressions)
-18. [Console I/O](#18-console-io)
-19. [Complete Grammar Reference](#19-complete-grammar-reference)
-20. [Code Examples](#20-code-examples)
+18. [Standard Library Reference](#18-standard-library-reference)
+19. [Console I/O](#19-console-io)
+20. [Complete Grammar Reference](#20-complete-grammar-reference)
+21. [Code Examples](#21-code-examples)
 
 ---
 
@@ -1540,39 +1541,324 @@ numbers.map(x -> x * x - (x * 2))
 
 ---
 
-## 18. Console I/O
+## 18. Standard Library Reference
 
-FOOBAR provides a default `CONSOLE` class for input and output operations.
+FOOBAR includes a comprehensive standard library with 7 static classes providing essential functionality. All standard library classes are static and do not need to be instantiated.
 
-### 18.1 CONSOLE.Print()
+### 18.1 CONSOLE Class
 
-**Purpose:** Print a string to the console
+The CONSOLE class handles all input and output operations.
 
-**Syntax:**
-```foobar
-CONSOLE.Print(stringValue)
-```
+#### Output Methods
 
-**Examples:**
-```foobar
-CONSOLE.Print("Hello, World!");
-CONSOLE.Print("This is a message");
+**CONSOLE.Print(string message)**
+- Prints a string followed by a newline
+- Example: `CONSOLE.Print("Hello, World!");`
 
-string message = "Welcome to FOOBAR";
-CONSOLE.Print(message);
-```
+**CONSOLE.PrintInteger(integer value)**
+- Prints an integer followed by a newline
+- Example: `CONSOLE.PrintInteger(42);`
 
-### 18.2 CONSOLE.PrintInteger()
+**CONSOLE.PrintFloat(float value)**
+- Prints a float followed by a newline
+- Example: `CONSOLE.PrintFloat(3.14);`
 
-**Purpose:** Print an integer to the console
+**CONSOLE.PrintBoolean(boolean value)**
+- Prints "true" or "false" followed by a newline
+- Example: `CONSOLE.PrintBoolean(true);`
 
-**Syntax:**
-```foobar
-CONSOLE.PrintInteger(integerValue)
-```
+#### Input Methods
 
-**Examples:**
-```foobar
+**CONSOLE.Scan() → string**
+- Reads a line of text from user input
+- Returns the input as a string
+- Example: `string name = CONSOLE.Scan();`
+
+**CONSOLE.ScanInteger() → integer**
+- Reads an integer from user input
+- Returns the parsed integer value
+- Example: `integer age = CONSOLE.ScanInteger();`
+
+**CONSOLE.ScanFloat() → float**
+- Reads a float from user input
+- Returns the parsed float value
+- Example: `float price = CONSOLE.ScanFloat();`
+
+**CONSOLE.ScanBoolean() → boolean**
+- Reads a boolean from user input
+- Accepts "true"/"false" (case-insensitive)
+- Example: `boolean isActive = CONSOLE.ScanBoolean();`
+
+#### Utility Methods
+
+**CONSOLE.Clear()**
+- Clears the terminal screen
+- Example: `CONSOLE.Clear();`
+
+### 18.2 MATH Class
+
+The MATH class provides mathematical operations and constants.
+
+**MATH.Min(integer a, integer b) → integer**
+- Returns the minimum of two integers
+- Example: `integer smaller = MATH.Min(10, 20);  // 10`
+
+**MATH.Max(integer a, integer b) → integer**
+- Returns the maximum of two integers
+- Example: `integer larger = MATH.Max(10, 20);  // 20`
+
+**MATH.Absolute(integer value) → integer**
+- Returns the absolute value
+- Example: `integer abs = MATH.Absolute(-15);  // 15`
+
+**MATH.SquareRoot(float value) → float**
+- Returns the square root
+- Example: `float root = MATH.SquareRoot(16.0);  // 4.0`
+
+**MATH.Power(float base, float exponent) → float**
+- Raises base to the power of exponent
+- Example: `float result = MATH.Power(2.0, 3.0);  // 8.0`
+
+**MATH.Random() → float**
+- Returns a random float between 0.0 and 1.0
+- Example: `float random = MATH.Random();`
+
+**MATH.Floor(float value) → integer**
+- Rounds down to nearest integer
+- Example: `integer floor = MATH.Floor(4.7);  // 4`
+
+**MATH.Ceiling(float value) → integer**
+- Rounds up to nearest integer
+- Example: `integer ceil = MATH.Ceiling(4.3);  // 5`
+
+**MATH.Round(float value) → integer**
+- Rounds to nearest integer
+- Example: `integer rounded = MATH.Round(4.5);  // 5`
+
+### 18.3 STRING Class
+
+The STRING class provides static string manipulation utilities.
+
+**STRING.Contains(string text, string search) → boolean**
+- Checks if text contains the search substring
+- Example: `boolean has = STRING.Contains("hello world", "world");  // true`
+
+**STRING.StartsWith(string text, string prefix) → boolean**
+- Checks if text starts with prefix
+- Example: `boolean starts = STRING.StartsWith("hello", "hel");  // true`
+
+**STRING.EndsWith(string text, string suffix) → boolean**
+- Checks if text ends with suffix
+- Example: `boolean ends = STRING.EndsWith("hello", "lo");  // true`
+
+**STRING.Concat(string a, string b) → string**
+- Concatenates two strings
+- Example: `string result = STRING.Concat("hello", " world");`
+
+**STRING.CharAt(string text, integer index) → character**
+- Returns character at specified index
+- Example: `character c = STRING.CharAt("hello", 1);  // 'e'`
+
+#### String Instance Methods
+
+Strings also have instance methods that can be called directly:
+
+**text.length() → integer**
+- Returns the length of the string
+- Example: `integer len = "hello".length();  // 5`
+
+**text.toUpper() → string**
+- Converts string to uppercase
+- Example: `string upper = "hello".toUpper();  // "HELLO"`
+
+**text.toLower() → string**
+- Converts string to lowercase
+- Example: `string lower = "HELLO".toLower();  // "hello"`
+
+**text.substring(integer start, integer end) → string**
+- Extracts substring from start to end (exclusive)
+- Example: `string sub = "hello".substring(1, 4);  // "ell"`
+
+**text.replace(string old, string new) → string**
+- Replaces all occurrences of old with new
+- Example: `string result = "hello".replace("l", "L");  // "heLLo"`
+
+**text.trim() → string**
+- Removes leading and trailing whitespace
+- Example: `string trimmed = "  hello  ".trim();  // "hello"`
+
+**text.toInteger() → integer**
+- Parses string as an integer
+- Example: `integer num = "42".toInteger();  // 42`
+
+**text.toFloat() → float**
+- Parses string as a float
+- Example: `float num = "3.14".toFloat();  // 3.14`
+
+### 18.4 ARRAY Class
+
+The ARRAY class provides static array utilities. Arrays also have built-in instance methods.
+
+**ARRAY.Length(integer[] arr) → integer**
+- Returns array length (can also use arr.length directly)
+- Example: `integer len = ARRAY.Length(myArray);`
+
+**ARRAY.Contains(integer[] arr, integer element) → boolean**
+- Checks if array contains element
+- Example: `boolean has = ARRAY.Contains(numbers, 42);`
+
+**ARRAY.IndexOf(integer[] arr, integer element) → integer**
+- Returns index of first occurrence, or -1 if not found
+- Example: `integer idx = ARRAY.IndexOf(numbers, 42);`
+
+#### Array Instance Methods
+
+All array types support these methods:
+
+**arr.map(lambda) → array**
+- Transforms each element using lambda function
+- Example: `integer[] doubled = numbers.map(x -> x * 2);`
+
+**arr.filter(lambda) → array**
+- Filters elements that match condition
+- Example: `integer[] evens = numbers.filter(x -> x % 2 == 0);`
+
+**arr.reduce(lambda, initial) → value**
+- Reduces array to single value
+- Example: `integer sum = numbers.reduce((acc, x) -> acc + x, 0);`
+
+**arr.sort() → array**
+- Returns sorted copy of array
+- Example: `integer[] sorted = numbers.sort();`
+
+**arr.unique() → array**
+- Returns array with duplicate elements removed
+- Example: `integer[] unique = numbers.unique();`
+
+**arr.find(lambda) → element**
+- Returns first element matching condition
+- Example: `integer first = numbers.find(x -> x > 10);`
+
+**arr.print()**
+- Prints array contents
+- Example: `numbers.print();  // [1, 2, 3, 4, 5]`
+
+**arr.length**
+- Property containing array length
+- Example: `integer len = numbers.length;`
+
+### 18.5 DATETIME Class
+
+The DATETIME class provides date and time functionality.
+
+**DATETIME.Now() → integer**
+- Returns current Unix timestamp (seconds since epoch)
+- Example: `integer timestamp = DATETIME.Now();`
+
+**DATETIME.Year(integer timestamp) → integer**
+- Extracts year from timestamp
+- Example: `integer year = DATETIME.Year(timestamp);`
+
+**DATETIME.Month(integer timestamp) → integer**
+- Extracts month (1-12) from timestamp
+- Example: `integer month = DATETIME.Month(timestamp);`
+
+**DATETIME.Day(integer timestamp) → integer**
+- Extracts day of month (1-31) from timestamp
+- Example: `integer day = DATETIME.Day(timestamp);`
+
+**DATETIME.Hour(integer timestamp) → integer**
+- Extracts hour (0-23) from timestamp
+- Example: `integer hour = DATETIME.Hour(timestamp);`
+
+**DATETIME.Minute(integer timestamp) → integer**
+- Extracts minute (0-59) from timestamp
+- Example: `integer minute = DATETIME.Minute(timestamp);`
+
+**DATETIME.Second(integer timestamp) → integer**
+- Extracts second (0-59) from timestamp
+- Example: `integer second = DATETIME.Second(timestamp);`
+
+**DATETIME.Format(integer timestamp, string format) → string**
+- Formats timestamp as string
+- Format codes: %Y (year), %m (month), %d (day), %H (hour), %M (minute), %S (second)
+- Example: `string formatted = DATETIME.Format(timestamp, "%Y-%m-%d");`
+
+### 18.6 RANDOM Class
+
+The RANDOM class provides random number generation.
+
+**RANDOM.Integer(integer min, integer max) → integer**
+- Returns random integer between min and max (inclusive)
+- Example: `integer dice = RANDOM.Integer(1, 6);`
+
+**RANDOM.Float(float min, float max) → float**
+- Returns random float between min and max
+- Example: `float rand = RANDOM.Float(0.0, 1.0);`
+
+**RANDOM.Boolean() → boolean**
+- Returns random boolean (true or false)
+- Example: `boolean coin = RANDOM.Boolean();`
+
+**RANDOM.Character() → character**
+- Returns random printable ASCII character
+- Example: `character ch = RANDOM.Character();`
+
+**RANDOM.Seed(integer seed)**
+- Sets the random number generator seed for reproducible results
+- Example: `RANDOM.Seed(12345);`
+
+### 18.7 FILE Class
+
+The FILE class provides file I/O operations.
+
+**FILE.Read(string path) → string**
+- Reads entire file contents as string
+- Returns empty string if file doesn't exist
+- Example: `string content = FILE.Read("data.txt");`
+
+**FILE.Write(string path, string content)**
+- Writes string to file (overwrites existing content)
+- Creates file if it doesn't exist
+- Example: `FILE.Write("output.txt", "Hello, World!");`
+
+**FILE.Append(string path, string content)**
+- Appends string to end of file
+- Creates file if it doesn't exist
+- Example: `FILE.Append("log.txt", "New log entry\n");`
+
+**FILE.Exists(string path) → boolean**
+- Checks if file exists
+- Example: `boolean exists = FILE.Exists("data.txt");`
+
+**FILE.Delete(string path) → boolean**
+- Deletes file, returns true if successful
+- Example: `boolean deleted = FILE.Delete("temp.txt");`
+
+**FILE.ReadLines(string path) → string[]**
+- Reads file as array of lines
+- Example: `string[] lines = FILE.ReadLines("data.txt");`
+
+**FILE.WriteLines(string path, string[] lines)**
+- Writes array of strings as lines to file
+- Example: `FILE.WriteLines("output.txt", lines);`
+
+---
+
+## 19. Console I/O
+
+*Note: For complete documentation of console I/O operations, see Section 18.1 (CONSOLE Class) in the Standard Library Reference.*
+
+The CONSOLE class is the primary interface for user interaction in FOOBAR programs. It provides methods for both output (printing) and input (scanning) of various data types.
+
+Quick reference:
+- **Output**: `CONSOLE.Print()`, `CONSOLE.PrintInteger()`, `CONSOLE.PrintFloat()`, `CONSOLE.PrintBoolean()`
+- **Input**: `CONSOLE.Scan()`, `CONSOLE.ScanInteger()`, `CONSOLE.ScanFloat()`, `CONSOLE.ScanBoolean()`
+- **Utility**: `CONSOLE.Clear()`
+
+For detailed documentation with examples, refer to the Standard Library Reference (Section 18).
+
+---
 CONSOLE.PrintInteger(42);
 CONSOLE.PrintInteger(-15);
 
@@ -1610,7 +1896,7 @@ Main() {
 
 ---
 
-## 19. Complete Grammar Reference
+## 20. Complete Grammar Reference
 
 ### 19.1 Program Structure
 
@@ -1747,7 +2033,7 @@ Literal := INTEGER | FLOAT | STRING | CHARACTER | 'true' | 'false'
 
 ---
 
-## 20. Code Examples
+## 21. Code Examples
 
 ### 20.1 Hello World
 

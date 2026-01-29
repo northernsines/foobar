@@ -1,0 +1,58 @@
+{
+  "name": "foobar-language",
+  "displayName": "FOOBAR Language Support",
+  "description": "Comprehensive IntelliSense, syntax highlighting, and autocomplete for FOOBAR v2.0 with full standard library support",
+  "version": "2.0.0",
+  "publisher": "foobar",
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "foobar",
+        "aliases": [
+          "FOOBAR",
+          "foobar"
+        ],
+        "extensions": [
+          ".foob"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "foobar",
+        "scopeName": "source.foobar",
+        "path": "./syntaxes/foobar.tmLanguage.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "foobar",
+        "path": "./snippets/foobar.json"
+      }
+    ],
+    "themes": [
+      {
+        "label": "FOOBAR (Dark)",
+        "uiTheme": "vs-dark",
+        "path": "./themes/foobar-theme.json"
+      }
+    ]
+  },
+  "activationEvents": [
+    "onLanguage:foobar"
+  ],
+  "main": "./extension.js",
+  "scripts": {
+    "test": "echo \"No tests yet\""
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.75.0"
+  }
+}
