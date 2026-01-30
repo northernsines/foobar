@@ -1,8 +1,0 @@
-
-class VEHICLE {
-    private integer speed;
-}
-
-Main() {
-    return true;
-}
