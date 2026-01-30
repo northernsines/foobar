@@ -17,6 +17,11 @@ FOOBAR is designed to be **readable, explicit, and predictable**. It provides th
 - Full encapsulation (`public`, `private`)
 - Clear object semantics with `thisclass`, `parent`, and `isa` keywords
 
+**Modular Code Organization**
+- Import system for organizing code across multiple files
+- Simple `import "library.foob";` syntax
+- Automatic dependency resolution and circular import detection
+
 **Functional Features as Tools**
 - Lambda expressions and method chaining
 - Array transformations: `map`, `filter`, `reduce`, `sort`, `unique`, `find`
@@ -41,22 +46,62 @@ FOOBAR is designed to be **readable, explicit, and predictable**. It provides th
 
 ## Quick Example
 
+**File: libraries/text_formatter.foob**
 ```foobar
+class TEXT_FORMATTER {
+    public Initialize() {
+        // Empty initializer
+    }
+    
+    public string Repeat(string text, integer times) {
+        string result = "";
+        integer count = 0;
+        
+        loop until(count >= times) {
+            result = result + text;
+            count++;
+        }
+        
+        return result;
+    }
+    
+    public void PrintHeader(string title) {
+        string line = thisclass.Repeat("=", 50);
+        CONSOLE.Print("");
+        CONSOLE.Print(line);
+        CONSOLE.Print(title);
+        CONSOLE.Print(line);
+        CONSOLE.Print("");
+    }
+}
+```
+
+**File: main.foob**
+```foobar
+import "libraries/text_formatter.foob";
+
 Main()
 {
+    TEXT_FORMATTER formatter = new TEXT_FORMATTER();
+    formatter.PrintHeader("NUMBER PROCESSOR");
+    
     integer[] inputtedNumbers = [];
     integer index = 1;
     integer userInput;
-    integer answer;
-    loop until (index == 7)
+    
+    loop until (index == 6)
     {
-        CONSOLE.Print("What is the " + index.toString() + "th number?");
+        CONSOLE.Print("Enter number " + index.toString() + ":");
         userInput = CONSOLE.ScanInteger();
         inputtedNumbers = inputtedNumbers + [userInput];
         index++;
     }
-    answer = SumEvenNumbers(inputtedNumbers);
-    CONSOLE.Print("The sum of all even numbers entered is " + answer.toString() + ".");
+    
+    integer answer = SumEvenNumbers(inputtedNumbers);
+    
+    formatter.PrintHeader("RESULT");
+    CONSOLE.Print("The sum of all even numbers is " + answer.toString());
+    
     return true;
 }
 
@@ -67,7 +112,6 @@ integer SumEvenNumbers(integer[] numbers)
         .reduce((acc, x) -> acc + x, 0);
     return sum;
 }
-
 ```
 
 ---
@@ -134,6 +178,88 @@ FOOBAR compiles to C and needs GCC (a C compiler) and Python 3. The easiest way 
 *Note for advanced users: You can use MinGW or other Windows C compilers, but you'll need to handle PATH configuration and dependencies yourself. Make sure you have Python 3 installed.*
 
 **Want the wonderful .foob icon?** Simply run the icon_setup.sh script!
+
+---
+
+## Import System & Libraries
+
+FOOBAR features a powerful import system that lets you organize code across multiple files and create reusable libraries.
+
+### Using Imports
+
+Place import statements at the top of your file:
+
+```foobar
+import "string_utils.foob";
+import "libraries/text_formatter.foob";
+
+Main() {
+    STRING_HELPER helper = new STRING_HELPER();
+    // Use imported classes
+    return true;
+}
+```
+
+### Creating External Libraries
+
+The `libraries/` folder is perfect for creating reusable code that can be shared across projects. Here's an example:
+
+**libraries/text_formatter.foob:**
+```foobar
+class TEXT_FORMATTER {
+    public Initialize() {
+        // Empty initializer
+    }
+    
+    public string Repeat(string text, integer times) {
+        string result = "";
+        integer count = 0;
+        
+        loop until(count >= times) {
+            result = result + text;
+            count++;
+        }
+        
+        return result;
+    }
+    
+    public void PrintHeader(string title) {
+        string line = thisclass.Repeat("=", 50);
+        CONSOLE.Print("");
+        CONSOLE.Print(line);
+        CONSOLE.Print(title);
+        CONSOLE.Print(line);
+        CONSOLE.Print("");
+    }
+}
+```
+
+Then use it in your program:
+
+```foobar
+import "libraries/text_formatter.foob";
+
+Main() {
+    TEXT_FORMATTER formatter = new TEXT_FORMATTER();
+    formatter.PrintHeader("My Program");
+    return true;
+}
+```
+
+### Built-in Standard Library
+
+FOOBAR includes a powerful standard library with no imports required:
+
+- **CONSOLE** - Input/output operations
+- **MATH** - Mathematical functions (Min, Max, SquareRoot, Power, etc.) and constants (PI, E)
+- **STRING** - String manipulation utilities
+- **ARRAY** - Array operations
+- **DATETIME** - Date and time functions
+- **RANDOM** - Random number generation
+- **FILE** - File I/O operations
+
+These are always available without any import statements!
+
 ---
 
 ## VSCode Extension
@@ -206,3 +332,5 @@ You should have received a copy of the GNU General Public License along with thi
 **Sonja Wilberding** - 2026
 
 ---
+
+*FOOBAR: It's your language. It's robust. It's fast.*

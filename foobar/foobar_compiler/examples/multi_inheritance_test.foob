@@ -1,0 +1,43 @@
+// Test multiple inheritance
+
+class FLYABLE {
+    public void Fly() {
+        CONSOLE.Print("Flying!");
+    }
+}
+
+class SWIMMABLE {
+    public void Swim() {
+        CONSOLE.Print("Swimming!");
+    }
+}
+
+class DUCK inherits FLYABLE, SWIMMABLE {
+    public void Quack() {
+        CONSOLE.Print("Quack!");
+    }
+}
+
+Main() {
+    CONSOLE.Print("Testing multiple inheritance...");
+    
+    DUCK donald = new DUCK();
+    
+    donald.Fly();    // From FLYABLE
+    donald.Swim();   // From SWIMMABLE
+    donald.Quack();  // From DUCK
+    
+    if(donald isa DUCK) {
+        CONSOLE.Print("Donald is a DUCK");
+    }
+    
+    if(donald isa FLYABLE) {
+        CONSOLE.Print("Donald is FLYABLE");
+    }
+    
+    if(donald isa SWIMMABLE) {
+        CONSOLE.Print("Donald is SWIMMABLE");
+    }
+    
+    return true;
+}

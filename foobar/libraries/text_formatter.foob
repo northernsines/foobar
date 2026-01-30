@@ -1,0 +1,211 @@
+// text_formatter.foob - Text formatting utilities library (v2.0)
+// Enhanced with auto-sizing, better box drawing, and useful text utilities
+
+class TEXT_FORMATTER {
+    private integer defaultWidth;
+    
+    public Initialize() {
+        // Default to 80 columns (standard terminal width)
+        thisclass.defaultWidth = 80;
+    }
+    
+    public Initialize(integer width) {
+        // Allow custom default width
+        thisclass.defaultWidth = width;
+    }
+    
+    // ============================================
+    // BASIC STRING UTILITIES
+    // ============================================
+    
+    public string Repeat(string text, integer times) {
+        string result = "";
+        integer count = 0;
+        
+        loop until(count >= times) {
+            result = result + text;
+            count++;
+        }
+        
+        return result;
+    }
+    
+    public string PadLeft(string text, integer width) {
+        integer textLen = text.length;
+        
+        if(textLen >= width) {
+            return text;
+        }
+        
+        integer padding = width - textLen;
+        return thisclass.Repeat(" ", padding) + text;
+    }
+    
+    public string PadRight(string text, integer width) {
+        integer textLen = text.length;
+        
+        if(textLen >= width) {
+            return text;
+        }
+        
+        integer padding = width - textLen;
+        return text + thisclass.Repeat(" ", padding);
+    }
+    
+    public string Center(string text, integer width) {
+        integer textLen = text.length;
+        
+        if(textLen >= width) {
+            return text;
+        }
+        
+        integer totalPadding = width - textLen;
+        integer leftPadding = totalPadding / 2;
+        integer rightPadding = totalPadding - leftPadding;
+        
+        return thisclass.Repeat(" ", leftPadding) + text + thisclass.Repeat(" ", rightPadding);
+    }
+    
+    // ============================================
+    // BOX DRAWING
+    // ============================================
+    
+    public void PrintBox(string message) {
+        // Auto-size box to message (with 4 chars padding: "* " and " *")
+        integer contentWidth = message.length + 4;
+        integer boxWidth = contentWidth;
+        
+        // Minimum box width of 20
+        if(boxWidth < 20) {
+            boxWidth = 20;
+        }
+        
+        string border = thisclass.Repeat("*", boxWidth);
+        string paddedMessage = "* " + thisclass.PadRight(message, boxWidth - 4) + " *";
+        
+        CONSOLE.Print(border);
+        CONSOLE.Print(paddedMessage);
+        CONSOLE.Print(border);
+    }
+    
+    public void PrintBoxCentered(string message) {
+        // Center the message inside a box of default width
+        integer innerWidth = thisclass.defaultWidth - 4;
+        string centeredMessage = thisclass.Center(message, innerWidth);
+        
+        string border = thisclass.Repeat("*", thisclass.defaultWidth);
+        string boxLine = "* " + centeredMessage + " *";
+        
+        CONSOLE.Print(border);
+        CONSOLE.Print(boxLine);
+        CONSOLE.Print(border);
+    }
+    
+    public void PrintBoxMultiline(string message, integer width) {
+        // Print a box with custom width
+        string border = thisclass.Repeat("*", width);
+        string paddedMessage = "* " + thisclass.PadRight(message, width - 4) + " *";
+        
+        CONSOLE.Print(border);
+        CONSOLE.Print(paddedMessage);
+        CONSOLE.Print(border);
+    }
+    
+    // ============================================
+    // HEADERS AND DIVIDERS
+    // ============================================
+    
+    public void PrintHeader(string title) {
+        // Print a header that spans the full default width
+        string line = thisclass.Repeat("=", thisclass.defaultWidth);
+        string centeredTitle = thisclass.Center(title, thisclass.defaultWidth);
+        
+        CONSOLE.Print("");
+        CONSOLE.Print(line);
+        CONSOLE.Print(centeredTitle);
+        CONSOLE.Print(line);
+        CONSOLE.Print("");
+    }
+    
+    public void PrintDivider() {
+        // Simple divider line
+        CONSOLE.Print(thisclass.Repeat("-", thisclass.defaultWidth));
+    }
+    
+    public void PrintDividerCustom(string customCharacter) {
+        // Custom character divider
+        CONSOLE.Print(thisclass.Repeat(customCharacter, thisclass.defaultWidth));
+    }
+    
+    public void PrintSection(string title) {
+        // Section header with underline
+        CONSOLE.Print("");
+        CONSOLE.Print(title);
+        CONSOLE.Print(thisclass.Repeat("-", title.length));
+        CONSOLE.Print("");
+    }
+    
+    // ============================================
+    // FANCY BOX DRAWING (Double border, etc.)
+    // ============================================
+    
+    public void PrintFancyBox(string message) {
+        // Box with double-line border effect
+        integer contentWidth = message.length + 4;
+        integer boxWidth = contentWidth;
+        
+        if(boxWidth < 20) {
+            boxWidth = 20;
+        }
+        
+        string topBorder = thisclass.Repeat("=", boxWidth);
+        string bottomBorder = thisclass.Repeat("=", boxWidth);
+        string paddedMessage = "| " + thisclass.PadRight(message, boxWidth - 4) + " |";
+        
+        CONSOLE.Print(topBorder);
+        CONSOLE.Print(paddedMessage);
+        CONSOLE.Print(bottomBorder);
+    }
+    
+    public void PrintTitle(string title) {
+        // Large centered title with decorative borders
+        integer titleLen = title.length;
+        integer boxWidth = titleLen + 8;
+        
+        if(boxWidth < thisclass.defaultWidth) {
+            boxWidth = thisclass.defaultWidth;
+        }
+        
+        string topBorder = thisclass.Repeat("=", boxWidth);
+        string bottomBorder = thisclass.Repeat("=", boxWidth);
+        string centeredTitle = thisclass.Center(title, boxWidth);
+        
+        CONSOLE.Print("");
+        CONSOLE.Print(topBorder);
+        CONSOLE.Print(centeredTitle);
+        CONSOLE.Print(bottomBorder);
+        CONSOLE.Print("");
+    }
+    
+    // ============================================
+    // UTILITY METHODS
+    // ============================================
+    
+    public void SetDefaultWidth(integer width) {
+        thisclass.defaultWidth = width;
+    }
+    
+    public integer GetDefaultWidth() {
+        return thisclass.defaultWidth;
+    }
+    
+    public void PrintCentered(string text) {
+        string centered = thisclass.Center(text, thisclass.defaultWidth);
+        CONSOLE.Print(centered);
+    }
+    
+    public void PrintRightAligned(string text) {
+        string aligned = thisclass.PadLeft(text, thisclass.defaultWidth);
+        CONSOLE.Print(aligned);
+    }
+}

@@ -1,0 +1,26 @@
+// string_utils.foob - String utility functions for FOOBAR
+
+class STRING_HELPER {
+    public Initialize() {
+        // Empty initializer
+    }
+    
+    public string Repeat(string text, integer times) {
+        string result = "";
+        integer count = 0;
+        
+        loop until(count >= times) {
+            result = result + text;
+            count++;
+        }
+        
+        return result;
+    }
+    
+    public void PrintBanner(string message) {
+        string line = thisclass.Repeat("=", 50);
+        CONSOLE.Print(line);
+        CONSOLE.Print(message);
+        CONSOLE.Print(line);
+    }
+}

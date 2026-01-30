@@ -1,0 +1,19 @@
+Main() {
+    integer x = 5;
+    integer y = 10;
+    integer z = 5;
+    
+    if(x <= y) {
+        CONSOLE.Print("5 <= 10: true");
+    }
+    
+    if(x >= z) {
+        CONSOLE.Print("5 >= 5: true");
+    }
+    
+    if(y >= x) {
+        CONSOLE.Print("10 >= 5: true");
+    }
+    
+    return true;
+}

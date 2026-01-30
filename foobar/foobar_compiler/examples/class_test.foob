@@ -1,0 +1,38 @@
+// Simple class test - basic features only
+
+class POINT {
+    private integer x;
+    private integer y;
+    
+    public Initialize(integer initX, integer initY) {
+        thisclass.x = initX;
+        thisclass.y = initY;
+    }
+    
+    public integer GetX() {
+        return thisclass.x;
+    }
+    
+    public integer GetY() {
+        return thisclass.y;
+    }
+    
+    public void Print() {
+        CONSOLE.Print("Point coordinates:");
+        CONSOLE.PrintInteger(thisclass.x);
+        CONSOLE.PrintInteger(thisclass.y);
+    }
+}
+
+Main() {
+    CONSOLE.Print("Testing basic class features...");
+    
+    POINT p = new POINT(10, 20);
+    p.Print();
+    
+    integer x = p.GetX();
+    CONSOLE.Print("X coordinate:");
+    CONSOLE.PrintInteger(x);
+    
+    return true;
+}

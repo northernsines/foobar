@@ -1,0 +1,224 @@
+// ============================================
+// FOOBAR Language Feature Showcase
+// Demonstrates all major language features
+// ============================================
+
+// Multiple Inheritance Example
+class ENGINE {
+    private integer horsepower;
+    
+    public Initialize(integer hp) {
+        thisclass.horsepower = hp;
+    }
+    
+    public integer GetHorsepower() {
+        return thisclass.horsepower;
+    }
+}
+
+class BATTERY {
+    private integer capacity;
+    
+    public Initialize(integer cap) {
+        thisclass.capacity = cap;
+    }
+    
+    public integer GetCapacity() {
+        return thisclass.capacity;
+    }
+}
+
+class HYBRID_CAR inherits ENGINE, BATTERY {
+    private string model;
+    
+    public Initialize(integer hp, integer cap, string m) {
+        // Calling parent constructors
+        parent.Initialize(hp);
+        thisclass.capacity = cap;
+        thisclass.model = m;
+    }
+    
+    public void DisplayStats() {
+        CONSOLE.Print("=== Hybrid Car Stats ===");
+        CONSOLE.Print("Horsepower:");
+        CONSOLE.PrintInteger(thisclass.GetHorsepower());
+        CONSOLE.Print("Battery Capacity:");
+        CONSOLE.PrintInteger(thisclass.GetCapacity());
+    }
+}
+
+// Enumeration Example
+enumerated Season {winter, spring, summer, autumn};
+
+Main() {
+    CONSOLE.Print("╔════════════════════════════════════╗");
+    CONSOLE.Print("║   FOOBAR FEATURE SHOWCASE          ║");
+    CONSOLE.Print("╚════════════════════════════════════╝");
+    CONSOLE.Print("");
+    
+    // ========================================
+    // SECTION 1: Object-Oriented Programming
+    // ========================================
+    CONSOLE.Print("1. OBJECT-ORIENTED PROGRAMMING");
+    CONSOLE.Print("   → Multiple Inheritance");
+    CONSOLE.Print("   → Type Checking with 'isa'");
+    CONSOLE.Print("");
+    
+    HYBRID_CAR myCar = new HYBRID_CAR(300, 85, "Tesla Model X");
+    myCar.DisplayStats();
+    
+    CONSOLE.Print("");
+    CONSOLE.Print("Type checking:");
+    
+    if(myCar isa HYBRID_CAR) {
+        CONSOLE.Print("   ✓ Is a HYBRID_CAR");
+    }
+    
+    if(myCar isa ENGINE) {
+        CONSOLE.Print("   ✓ Inherits from ENGINE");
+    }
+    
+    if(myCar isa BATTERY) {
+        CONSOLE.Print("   ✓ Inherits from BATTERY");
+    }
+    
+    CONSOLE.Print("");
+    
+    // ========================================
+    // SECTION 2: Functional Programming
+    // ========================================
+    CONSOLE.Print("2. FUNCTIONAL PROGRAMMING");
+    CONSOLE.Print("   → Map, Filter, Reduce");
+    CONSOLE.Print("   → Lambdas & Chaining");
+    CONSOLE.Print("");
+    
+    integer[] numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    
+    CONSOLE.Print("Original array:");
+    numbers.print();
+    
+    // Map example
+    integer[] squared = numbers.map(x -> x * x);
+    CONSOLE.Print("Squared (map):");
+    squared.print();
+    
+    // Filter example
+    integer[] largeNumbers = numbers.filter(x -> x >= 5);
+    CONSOLE.Print("Numbers >= 5 (filter):");
+    largeNumbers.print();
+    
+    // Reduce example
+    integer sum = numbers.reduce((acc, x) -> acc + x, 0);
+    CONSOLE.Print("Sum (reduce):");
+    CONSOLE.PrintInteger(sum);
+    
+    // Chaining example
+    integer[] chainResult = numbers
+        .filter(x -> x - (x / 2 * 2) > 0)  // Odds only
+        .map(x -> x * 3)                    // Triple them
+        .sort();                             // Sort
+    
+    CONSOLE.Print("Chained (odds * 3, sorted):");
+    chainResult.print();
+    
+    CONSOLE.Print("");
+    
+    // ========================================
+    // SECTION 3: Advanced Operators
+    // ========================================
+    CONSOLE.Print("3. OPERATORS");
+    CONSOLE.Print("   → Comparison: ==, >, <, >=, <=");
+    CONSOLE.Print("   → Logical: &, V, VV, not()");
+    CONSOLE.Print("");
+    
+    integer a = 10;
+    integer b = 5;
+    
+    if(a >= b) {
+        CONSOLE.Print("   ✓ 10 >= 5 is true");
+    }
+    
+    if(a <= 20) {
+        CONSOLE.Print("   ✓ 10 <= 20 is true");
+    }
+    
+    boolean x = true;
+    boolean y = false;
+    
+    if(x & not(y)) {
+        CONSOLE.Print("   ✓ true AND NOT false is true");
+    }
+    
+    if(x V y) {
+        CONSOLE.Print("   ✓ true OR false is true");
+    }
+    
+    CONSOLE.Print("");
+    
+    // ========================================
+    // SECTION 4: Control Flow
+    // ========================================
+    CONSOLE.Print("4. CONTROL FLOW");
+    CONSOLE.Print("   → loop for");
+    CONSOLE.Print("   → loop until");
+    CONSOLE.Print("   → if/elseif/else");
+    CONSOLE.Print("");
+    
+    // Loop for
+    CONSOLE.Print("Loop for(3):");
+    integer counter = 0;
+    loop for(3) {
+        counter++;
+        CONSOLE.PrintInteger(counter);
+    }
+    
+    // Loop until
+    CONSOLE.Print("Loop until >= 5:");
+    integer value = 0;
+    loop until(value >= 5) {
+        value++;
+    }
+    CONSOLE.PrintInteger(value);
+    
+    // Conditionals
+    integer score = 85;
+    if(score >= 90) {
+        CONSOLE.Print("Grade: A");
+    } elseif(score >= 80) {
+        CONSOLE.Print("Grade: B");
+    } else() {
+        CONSOLE.Print("Grade: C");
+    }
+    
+    CONSOLE.Print("");
+    
+    // ========================================
+    // SECTION 5: Array Operations
+    // ========================================
+    CONSOLE.Print("5. ARRAY OPERATIONS");
+    CONSOLE.Print("   → sort, unique, find");
+    CONSOLE.Print("");
+    
+    integer[] unsorted = [5, 2, 8, 2, 1, 5];
+    CONSOLE.Print("Unsorted:");
+    unsorted.print();
+    
+    integer[] sorted = unsorted.sort();
+    CONSOLE.Print("Sorted:");
+    sorted.print();
+    
+    integer[] unique = unsorted.unique();
+    CONSOLE.Print("Unique values:");
+    unique.print();
+    
+    integer found = sorted.find(x -> x > 5);
+    CONSOLE.Print("First value > 5:");
+    CONSOLE.PrintInteger(found);
+    
+    CONSOLE.Print("");
+    CONSOLE.Print("╔════════════════════════════════════╗");
+    CONSOLE.Print("║   ALL FEATURES DEMONSTRATED!       ║");
+    CONSOLE.Print("╚════════════════════════════════════╝");
+    
+    return true;
+}

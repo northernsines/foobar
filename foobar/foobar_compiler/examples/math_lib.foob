@@ -1,0 +1,38 @@
+// math_lib.foob - A simple math library for FOOBAR
+
+class CALCULATOR {
+    private integer lastResult;
+    
+    public Initialize() {
+        thisclass.lastResult = 0;
+    }
+    
+    public integer Add(integer a, integer b) {
+        thisclass.lastResult = a + b;
+        return thisclass.lastResult;
+    }
+    
+    public integer Multiply(integer a, integer b) {
+        thisclass.lastResult = a * b;
+        return thisclass.lastResult;
+    }
+    
+    public integer GetLastResult() {
+        return thisclass.lastResult;
+    }
+}
+
+class GEOMETRY {
+    public Initialize() {
+        // Empty initializer
+    }
+    
+    public integer CalculateArea(integer width, integer height) {
+        return width * height;
+    }
+    
+    public integer CalculateCircleArea(integer radius) {
+        // Using integer approximation: area ≈ 3 * r^2
+        return 3 * (radius ^ 2);
+    }
+}

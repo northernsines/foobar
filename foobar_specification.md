@@ -19,17 +19,18 @@ FOOBAR is a statically typed, imperative, object-oriented programming language w
 8. [Arrays](#8-arrays)
 9. [Comments](#9-comments)
 10. [Entry Point and Program Control](#10-entry-point-and-program-control)
-11. [Methods](#11-methods)
-12. [Classes and Object-Oriented Programming](#12-classes-and-object-oriented-programming)
-13. [Inheritance](#13-inheritance)
-14. [Enumerations](#14-enumerations)
-15. [Control Flow Statements](#15-control-flow-statements)
-16. [Functional Programming Features](#16-functional-programming-features)
-17. [Lambda Expressions](#17-lambda-expressions)
-18. [Standard Library Reference](#18-standard-library-reference)
-19. [Console I/O](#19-console-io)
-20. [Complete Grammar Reference](#20-complete-grammar-reference)
-21. [Code Examples](#21-code-examples)
+11. [Imports and Modules](#11-imports-and-modules)
+12. [Methods](#12-methods)
+13. [Classes and Object-Oriented Programming](#13-classes-and-object-oriented-programming)
+14. [Inheritance](#14-inheritance)
+15. [Enumerations](#15-enumerations)
+16. [Control Flow Statements](#16-control-flow-statements)
+17. [Functional Programming Features](#17-functional-programming-features)
+18. [Lambda Expressions](#18-lambda-expressions)
+19. [Standard Library Reference](#19-standard-library-reference)
+20. [Console I/O](#20-console-io)
+21. [Complete Grammar Reference](#21-complete-grammar-reference)
+22. [Code Examples](#22-code-examples)
 
 ---
 
@@ -91,6 +92,9 @@ The following are **reserved keywords** and cannot be used as identifiers:
 - `thisclass`
 - `parent`
 - `isa`
+
+**Module System:**
+- `import`
 
 **Access Modifiers:**
 - `public`
@@ -621,9 +625,254 @@ The program terminates when `Main()` returns. There is no explicit `exit()` or `
 
 ---
 
-## 11. Methods
+## 11. Imports and Modules
 
-### 11.1 Method Declaration
+### 22.1 The Module System
+
+FOOBAR supports organizing code across multiple files using the `import` statement. Each `.foob` file acts as a module that can be imported into other files.
+
+### 22.2 Import Syntax
+
+Import statements must appear at the **very top** of a file, before any other declarations:
+
+```foobar
+import "filepath.foob";
+```
+
+**Rules:**
+- Import statements must be the first non-comment lines in a file
+- The filepath must be a string literal enclosed in double quotes
+- The filepath is relative to the current file's location
+- The `.foob` extension is required in the import statement
+- Each import must end with a semicolon
+
+**Example:**
+```foobar
+import "math_utils.foob";
+import "string_helpers.foob";
+
+Main() {
+    // Can now use classes/functions from imported files
+    CALCULATOR calc = new CALCULATOR();
+    return true;
+}
+```
+
+### 22.3 Import Resolution
+
+When a file is imported, FOOBAR searches for it relative to the importing file's directory:
+
+```
+project/
+  main.foob
+  utils/
+    math.foob
+    string.foob
+```
+
+From `main.foob`:
+```foobar
+import "utils/math.foob";      // Import from subdirectory
+import "utils/string.foob";
+```
+
+From `utils/math.foob`:
+```foobar
+import "string.foob";           // Import from same directory
+```
+
+### 22.4 How Imports Work
+
+When you import a file:
+1. All classes, enums, and top-level functions from that file become available
+2. Imported items are added to the global scope
+3. The compiler automatically handles dependencies and compilation order
+4. Circular imports are detected and reported as errors
+
+**Example Library File (libraries/text_formatter.foob):**
+```foobar
+class TEXT_FORMATTER {
+    public Initialize() {
+        // Empty initializer
+    }
+    
+    public string Repeat(string text, integer times) {
+        string result = "";
+        integer count = 0;
+        loop until(count >= times) {
+            result = result + text;
+            count++;
+        }
+        return result;
+    }
+    
+    public void PrintHeader(string title) {
+        string line = thisclass.Repeat("=", 50);
+        CONSOLE.Print(line);
+        CONSOLE.Print(title);
+        CONSOLE.Print(line);
+    }
+}
+```
+
+**Example Main File:**
+```foobar
+import "libraries/text_formatter.foob";
+
+Main() {
+    TEXT_FORMATTER formatter = new TEXT_FORMATTER();
+    formatter.PrintHeader("WELCOME TO FOOBAR");
+    CONSOLE.Print("Hello, World!");
+    return true;
+}
+```
+
+### 22.5 The Main() Function in Multi-File Projects
+
+**Important Rules:**
+- Only the **entry-point file** (the file you compile) should have a `Main()` function
+- Imported library files should **not** define `Main()`
+- If multiple files define `Main()`, only the one in the main file will be used
+
+**Correct Structure:**
+```
+// math_lib.foob - NO Main() here
+class CALCULATOR { ... }
+
+// main.foob - Main() goes here
+import "math_lib.foob";
+
+Main() {
+    // Entry point
+    return true;
+}
+```
+
+### 22.6 Name Collisions
+
+If two imported files define classes or functions with the same name, the compiler will report a duplicate name error:
+
+```
+Error: Duplicate class definition: 'CALCULATOR'
+  First defined in: math_lib.foob
+  Also defined in: advanced_math.foob
+```
+
+To avoid collisions:
+- Use descriptive, unique class names
+- Follow naming conventions (UPPER_SNAKE_CASE for classes)
+- Organize related functionality into well-named modules
+
+### 22.7 Circular Import Detection
+
+FOOBAR detects circular imports and reports them as errors:
+
+```
+Error: Circular import detected:
+  main.foob imports util.foob
+  util.foob imports helper.foob
+  helper.foob imports main.foob
+```
+
+**Best Practice:** Organize your code to avoid circular dependencies. Extract shared functionality into separate modules that don't depend on each other.
+
+### 22.8 Compilation
+
+To compile a multi-file project, simply compile the main file:
+
+```bash
+python3 foobar.py compile main.foob
+```
+
+The compiler will:
+1. Parse the main file
+2. Automatically find and parse all imported files
+3. Recursively handle imports-of-imports
+4. Check for circular dependencies
+5. Check for duplicate names
+6. Combine everything into a single executable
+
+Use the `-v` flag to see which files are being compiled:
+
+```bash
+python3 foobar.py compile main.foob -v
+```
+
+Output:
+```
+Compiling main.foob...
+  [1/5] Collecting imports...
+  Found 3 file(s) to compile:
+    - main.foob
+    - math_lib.foob
+    - string_utils.foob
+  [2/5] Checking for circular imports...
+  [3/5] Combining programs...
+  [4/5] Generating C code...
+  [5/5] Compiling C code with gcc...
+✓ Successfully compiled to main
+```
+
+### 22.9 Complete Import Example
+
+**File: geometry.foob**
+```foobar
+class RECTANGLE {
+    private integer width;
+    private integer height;
+    
+    public Initialize(integer w, integer h) {
+        thisclass.width = w;
+        thisclass.height = h;
+    }
+    
+    public integer Area() {
+        return thisclass.width * thisclass.height;
+    }
+}
+
+class CIRCLE {
+    private integer radius;
+    
+    public Initialize(integer r) {
+        thisclass.radius = r;
+    }
+    
+    public integer Area() {
+        // Integer approximation: π ≈ 3
+        return 3 * (thisclass.radius ^ 2);
+    }
+}
+```
+
+**File: main.foob**
+```foobar
+import "geometry.foob";
+
+Main() {
+    CONSOLE.Print("=== Geometry Demo ===");
+    
+    RECTANGLE rect = new RECTANGLE(10, 5);
+    CONSOLE.Print("Rectangle (10x5) area: " + rect.Area().toString());
+    
+    CIRCLE circ = new CIRCLE(5);
+    CONSOLE.Print("Circle (radius 5) area: " + circ.Area().toString());
+    
+    return true;
+}
+```
+
+**Compile and run:**
+```bash
+python3 foobar.py compile main.foob
+./main
+```
+
+---
+
+## 13. Methods
+
+### 22.1 Method Declaration
 
 Methods are declared with a return type, name, parameters, and body:
 
@@ -641,7 +890,7 @@ integer Add(integer a, integer b) {
 }
 ```
 
-### 11.2 Return Types
+### 22.2 Return Types
 
 All methods (except `Main()` and constructors) must have an explicit return type:
 
@@ -669,7 +918,7 @@ integer[] GetNumbers() {
 }
 ```
 
-### 11.3 Parameters
+### 22.3 Parameters
 
 Methods can have zero or more parameters:
 
@@ -691,7 +940,7 @@ string FormatName(string firstName, string lastName) {
 }
 ```
 
-### 11.4 Method Calls
+### 22.4 Method Calls
 
 Methods are called using their name followed by parentheses with arguments:
 
@@ -701,7 +950,7 @@ string fullName = FormatName("John", "Doe");
 PrintMessage();
 ```
 
-### 11.5 Access Modifiers
+### 22.5 Access Modifiers
 
 Methods can be `public` or `private`:
 
@@ -718,15 +967,15 @@ private void InternalHelper() {
 }
 ```
 
-### 11.6 Method Overloading
+### 22.6 Method Overloading
 
 FOOBAR does **not** support method overloading. Each method name must be unique within its scope.
 
 ---
 
-## 12. Classes and Object-Oriented Programming
+## 14. Classes and Object-Oriented Programming
 
-### 12.1 Class Declaration
+### 22.1 Class Declaration
 
 Classes are declared using the `class` keyword:
 
@@ -749,7 +998,7 @@ class PERSON {
 }
 ```
 
-### 12.2 Fields
+### 22.2 Fields
 
 Fields are variables that belong to a class instance:
 
@@ -764,7 +1013,7 @@ class COUNTER {
 - `public` - Accessible from outside the class
 - `private` - Only accessible within the class (default)
 
-### 12.3 The Constructor - Initialize()
+### 22.3 The Constructor - Initialize()
 
 Every class can have a constructor named `Initialize()`:
 
@@ -786,7 +1035,7 @@ class PERSON {
 - Constructor can have parameters
 - Constructor can be `public` or `private`
 
-### 12.4 Object Instantiation
+### 22.4 Object Instantiation
 
 Objects are created using the `new` keyword with the **class name** (not the constructor name):
 
@@ -797,7 +1046,7 @@ COUNTER counter = new COUNTER(0);
 
 **Important:** Even though the constructor is named `Initialize`, you instantiate with `new CLASS_NAME()`, NOT `new Initialize()`.
 
-### 12.5 The `thisclass` Keyword
+### 22.5 The `thisclass` Keyword
 
 `thisclass` refers to the current instance of the class:
 
@@ -822,7 +1071,7 @@ class RECTANGLE {
 - Calling instance methods: `thisclass.MethodName()`
 - Distinguishing between parameters and fields with the same name
 
-### 12.6 Member Access
+### 22.6 Member Access
 
 Access fields and methods using the dot operator (`.`):
 
@@ -832,7 +1081,7 @@ string name = person.GetName();
 person.SetAge(31);
 ```
 
-### 12.7 Public vs Private
+### 22.7 Public vs Private
 
 **Private members** (default):
 - Only accessible within the class
@@ -856,7 +1105,7 @@ class BANK_ACCOUNT {
 }
 ```
 
-### 12.8 Complete Class Example
+### 22.8 Complete Class Example
 
 ```foobar
 class COUNTER {
@@ -897,9 +1146,9 @@ Main() {
 
 ---
 
-## 13. Inheritance
+## 15. Inheritance
 
-### 13.1 Single Inheritance
+### 22.1 Single Inheritance
 
 A class can inherit from one parent class using the `inherits` keyword:
 
@@ -930,7 +1179,7 @@ class DOG inherits ANIMAL {
 }
 ```
 
-### 13.2 Multiple Inheritance
+### 22.2 Multiple Inheritance
 
 A class can inherit from **multiple** parent classes:
 
@@ -962,7 +1211,7 @@ Main() {
 }
 ```
 
-### 13.3 The `parent` Keyword
+### 22.3 The `parent` Keyword
 
 `parent` refers to the parent class and is used to call parent methods:
 
@@ -999,7 +1248,7 @@ class CAR inherits VEHICLE {
 - To access methods from specific parents, the child class inherits all methods from all parents
 - Method name conflicts are resolved by the order of inheritance (first parent takes precedence)
 
-### 13.4 The `isa` Operator
+### 22.4 The `isa` Operator
 
 The `isa` operator checks if an object is an instance of a class or inherits from it:
 
@@ -1034,7 +1283,7 @@ object isa CLASS_NAME
 
 **Returns:** `boolean` (`true` if object is instance of or inherits from CLASS_NAME)
 
-### 13.5 Accessing Parent Fields
+### 22.5 Accessing Parent Fields
 
 Child classes inherit fields from parent classes, but can only access them if they're `public` or by using inherited public methods:
 
@@ -1070,9 +1319,9 @@ class CIRCLE inherits SHAPE {
 
 ---
 
-## 14. Enumerations
+## 16. Enumerations
 
-### 14.1 Enum Declaration
+### 22.1 Enum Declaration
 
 Enumerations define a type with a fixed set of named values:
 
@@ -1087,7 +1336,7 @@ enumerated Color {red, green, blue, yellow};
 enumerated Status {pending, approved, rejected};
 ```
 
-### 14.2 Enum Usage
+### 22.2 Enum Usage
 
 Access enum values using dot notation:
 
@@ -1106,7 +1355,7 @@ Main() {
 }
 ```
 
-### 14.3 Enum Values
+### 22.3 Enum Values
 
 Enum values are **lowercase** by convention:
 
@@ -1114,7 +1363,7 @@ Enum values are **lowercase** by convention:
 enumerated DayOfWeek {monday, tuesday, wednesday, thursday, friday, saturday, sunday};
 ```
 
-### 14.4 Enum Printing
+### 22.4 Enum Printing
 
 Enum values can be printed:
 
@@ -1130,9 +1379,9 @@ Main() {
 
 ---
 
-## 15. Control Flow Statements
+## 17. Control Flow Statements
 
-### 15.1 If Statements
+### 22.1 If Statements
 
 **Syntax:**
 ```foobar
@@ -1149,7 +1398,7 @@ if(x > 5) {
 }
 ```
 
-### 15.2 If-Else Statements
+### 22.2 If-Else Statements
 
 **Syntax:**
 ```foobar
@@ -1172,7 +1421,7 @@ if(x > 5) {
 }
 ```
 
-### 15.3 If-Elseif-Else Statements
+### 22.3 If-Elseif-Else Statements
 
 **Syntax:**
 ```foobar
@@ -1204,7 +1453,7 @@ if(score >= 90) {
 }
 ```
 
-### 15.4 Loop For Statement
+### 22.4 Loop For Statement
 
 **Syntax:**
 ```foobar
@@ -1238,7 +1487,7 @@ loop for(x * 5) {  // Loops 10 times
 }
 ```
 
-### 15.5 Loop Until Statement
+### 22.5 Loop Until Statement
 
 **Syntax:**
 ```foobar
@@ -1266,17 +1515,17 @@ loop until(x > 100) {
 
 **Important:** The condition is checked **before** each iteration, so the loop body may never execute if the condition is initially true.
 
-### 15.6 Break and Continue
+### 22.6 Break and Continue
 
 FOOBAR does **not** support `break` or `continue` statements. Use conditional logic and loop conditions instead.
 
 ---
 
-## 16. Functional Programming Features
+## 18. Functional Programming Features
 
 FOOBAR includes functional programming features for array transformations. These features use lambda expressions and method chaining.
 
-### 16.1 The `map()` Method
+### 22.1 The `map()` Method
 
 **Purpose:** Transform each element of an array
 
@@ -1302,7 +1551,7 @@ integer[] added = numbers.map(x -> x + 10);
 // Result: [11, 12, 13, 14, 15]
 ```
 
-### 16.2 The `filter()` Method
+### 22.2 The `filter()` Method
 
 **Purpose:** Select elements that satisfy a condition
 
@@ -1328,7 +1577,7 @@ integer[] odds = numbers.filter(x -> x - (x / 2 * 2) > 0);
 // Result: [1, 3, 5, 7, 9]
 ```
 
-### 16.3 The `reduce()` Method
+### 22.3 The `reduce()` Method
 
 **Purpose:** Reduce an array to a single value
 
@@ -1360,7 +1609,7 @@ integer max = numbers.reduce((acc, x) -> acc > x ? acc : x);
 
 **Note:** When `reduce()` is called without an initial value, it uses the first element as the initial accumulator.
 
-### 16.4 The `sort()` Method
+### 22.4 The `sort()` Method
 
 **Purpose:** Sort array elements in ascending order
 
@@ -1378,7 +1627,7 @@ integer[] sorted = unsorted.sort();
 
 **Note:** `sort()` creates a new sorted array; it does not modify the original array.
 
-### 16.5 The `unique()` Method
+### 22.5 The `unique()` Method
 
 **Purpose:** Remove duplicate elements
 
@@ -1394,7 +1643,7 @@ integer[] unique = withDupes.unique();
 // Result: [1, 2, 3, 4, 5]
 ```
 
-### 16.6 The `find()` Method
+### 22.6 The `find()` Method
 
 **Purpose:** Find the first element matching a condition
 
@@ -1413,7 +1662,7 @@ integer found = numbers.find(x -> x > 7);
 
 **Note:** If no element matches, the behavior depends on implementation (may return 0, -1, or throw error).
 
-### 16.7 The `print()` Method
+### 22.7 The `print()` Method
 
 **Purpose:** Print the array to console
 
@@ -1429,7 +1678,7 @@ numbers.print();
 // Output: [1, 2, 3, 4, 5]
 ```
 
-### 16.8 Method Chaining
+### 22.8 Method Chaining
 
 Functional methods can be **chained** together:
 
@@ -1457,11 +1706,11 @@ integer[] processed = data
 
 ---
 
-## 17. Lambda Expressions
+## 19. Lambda Expressions
 
 Lambda expressions are anonymous functions used primarily with array transformation methods.
 
-### 17.1 Lambda Syntax
+### 22.1 Lambda Syntax
 
 **Single parameter:**
 ```foobar
@@ -1482,7 +1731,7 @@ x -> x + 10
 (a, b) -> a * b
 ```
 
-### 17.2 Lambda Parameters
+### 22.2 Lambda Parameters
 
 Parameter types are **inferred** from the context (the array being operated on):
 
@@ -1491,7 +1740,7 @@ integer[] numbers = [1, 2, 3];
 integer[] doubled = numbers.map(x -> x * 2);  // x is inferred as integer
 ```
 
-### 17.3 Lambda Body
+### 22.3 Lambda Body
 
 The body of a lambda is an **expression**, not a statement block:
 
@@ -1506,7 +1755,7 @@ x -> { return x * 2; }    // NOT SUPPORTED
 x -> { integer y = x * 2; return y; }  // NOT SUPPORTED
 ```
 
-### 17.4 Using Lambdas
+### 22.4 Using Lambdas
 
 Lambdas are used with array methods:
 
@@ -1524,7 +1773,7 @@ numbers.reduce((acc, x) -> acc + x, 0)
 numbers.find(x -> x == 7)
 ```
 
-### 17.5 Complex Lambda Expressions
+### 22.5 Complex Lambda Expressions
 
 Lambda bodies can be complex expressions:
 
@@ -1541,11 +1790,11 @@ numbers.map(x -> x * x - (x * 2))
 
 ---
 
-## 18. Standard Library Reference
+## 20. Standard Library Reference
 
 FOOBAR includes a comprehensive standard library with 7 static classes providing essential functionality. All standard library classes are static and do not need to be instantiated.
 
-### 18.1 CONSOLE Class
+### 22.1 CONSOLE Class
 
 The CONSOLE class handles all input and output operations.
 
@@ -1595,7 +1844,7 @@ The CONSOLE class handles all input and output operations.
 - Clears the terminal screen
 - Example: `CONSOLE.Clear();`
 
-### 18.2 MATH Class
+### 22.2 MATH Class
 
 The MATH class provides mathematical operations and constants.
 
@@ -1635,7 +1884,7 @@ The MATH class provides mathematical operations and constants.
 - Rounds to nearest integer
 - Example: `integer rounded = MATH.Round(4.5);  // 5`
 
-### 18.3 STRING Class
+### 22.3 STRING Class
 
 The STRING class provides static string manipulation utilities.
 
@@ -1695,7 +1944,7 @@ Strings also have instance methods that can be called directly:
 - Parses string as a float
 - Example: `float num = "3.14".toFloat();  // 3.14`
 
-### 18.4 ARRAY Class
+### 22.4 ARRAY Class
 
 The ARRAY class provides static array utilities. Arrays also have built-in instance methods.
 
@@ -1747,7 +1996,7 @@ All array types support these methods:
 - Property containing array length
 - Example: `integer len = numbers.length;`
 
-### 18.5 DATETIME Class
+### 22.5 DATETIME Class
 
 The DATETIME class provides date and time functionality.
 
@@ -1784,7 +2033,7 @@ The DATETIME class provides date and time functionality.
 - Format codes: %Y (year), %m (month), %d (day), %H (hour), %M (minute), %S (second)
 - Example: `string formatted = DATETIME.Format(timestamp, "%Y-%m-%d");`
 
-### 18.6 RANDOM Class
+### 22.6 RANDOM Class
 
 The RANDOM class provides random number generation.
 
@@ -1808,7 +2057,7 @@ The RANDOM class provides random number generation.
 - Sets the random number generator seed for reproducible results
 - Example: `RANDOM.Seed(12345);`
 
-### 18.7 FILE Class
+### 22.7 FILE Class
 
 The FILE class provides file I/O operations.
 
@@ -1845,7 +2094,7 @@ The FILE class provides file I/O operations.
 
 ---
 
-## 19. Console I/O
+## 21. Console I/O
 
 *Note: For complete documentation of console I/O operations, see Section 18.1 (CONSOLE Class) in the Standard Library Reference.*
 
@@ -1866,7 +2115,7 @@ integer x = 100;
 CONSOLE.PrintInteger(x);
 ```
 
-### 18.3 Array Printing
+### 22.3 Array Printing
 
 Arrays can be printed using the `.print()` method:
 
@@ -1875,7 +2124,7 @@ integer[] numbers = [1, 2, 3, 4, 5];
 numbers.print();  // Output: [1, 2, 3, 4, 5]
 ```
 
-### 18.4 Enum Printing
+### 22.4 Enum Printing
 
 Enum values can be printed using `CONSOLE.Print()`:
 
@@ -1890,15 +2139,15 @@ Main() {
 }
 ```
 
-### 18.5 CONSOLE.Scan()
+### 22.5 CONSOLE.Scan()
 
 **Note:** Input functionality is mentioned in the original spec but implementation details may vary. Consult implementation documentation for usage.
 
 ---
 
-## 20. Complete Grammar Reference
+## 22. Complete Grammar Reference
 
-### 19.1 Program Structure
+### 22.1 Program Structure
 
 ```
 Program := Declaration*
@@ -1908,7 +2157,7 @@ Declaration := ClassDecl
             | MethodDecl
 ```
 
-### 19.2 Class Declaration
+### 22.2 Class Declaration
 
 ```
 ClassDecl := 'class' IDENTIFIER ('inherits' IDENTIFIER (',' IDENTIFIER)*)? '{' ClassMember* '}'
@@ -1930,13 +2179,13 @@ ParameterList := Parameter (',' Parameter)*
 Parameter := Type IDENTIFIER
 ```
 
-### 19.3 Enumeration Declaration
+### 22.3 Enumeration Declaration
 
 ```
 EnumDecl := 'enumerated' IDENTIFIER '{' IDENTIFIER (',' IDENTIFIER)* '}' ';'
 ```
 
-### 19.4 Method Declaration (Top-Level)
+### 22.4 Method Declaration (Top-Level)
 
 ```
 MethodDecl := Type IDENTIFIER '(' ParameterList? ')' Block
@@ -1948,7 +2197,7 @@ Type := PrimitiveType ('[' ']')?
 PrimitiveType := 'boolean' | 'integer' | 'longinteger' | 'float' | 'longfloat' | 'string' | 'character' | 'void'
 ```
 
-### 19.5 Statements
+### 22.5 Statements
 
 ```
 Block := '{' Statement* '}'
@@ -1973,7 +2222,7 @@ LoopStmt := 'loop' 'for' '(' Expression ')' Block
          | 'loop' 'until' '(' Expression ')' Block
 ```
 
-### 19.6 Expressions
+### 22.6 Expressions
 
 ```
 Expression := Assignment
@@ -2033,9 +2282,9 @@ Literal := INTEGER | FLOAT | STRING | CHARACTER | 'true' | 'false'
 
 ---
 
-## 21. Code Examples
+## 23. Code Examples
 
-### 20.1 Hello World
+### 22.1 Hello World
 
 ```foobar
 Main() {
@@ -2044,7 +2293,7 @@ Main() {
 }
 ```
 
-### 20.2 Variables and Arithmetic
+### 22.2 Variables and Arithmetic
 
 ```foobar
 Main() {
@@ -2068,7 +2317,7 @@ Main() {
 }
 ```
 
-### 20.3 Simple Class
+### 22.3 Simple Class
 
 ```foobar
 class COUNTER {
@@ -2104,7 +2353,7 @@ Main() {
 }
 ```
 
-### 20.4 Inheritance
+### 22.4 Inheritance
 
 ```foobar
 class ANIMAL {
@@ -2149,7 +2398,7 @@ Main() {
 }
 ```
 
-### 20.5 Functional Programming
+### 22.5 Functional Programming
 
 ```foobar
 Main() {
@@ -2186,7 +2435,7 @@ Main() {
 }
 ```
 
-### 20.6 Control Flow
+### 22.6 Control Flow
 
 ```foobar
 Main() {
@@ -2220,7 +2469,7 @@ Main() {
 }
 ```
 
-### 20.7 Multiple Inheritance
+### 22.7 Multiple Inheritance
 
 ```foobar
 class ENGINE {
@@ -2285,7 +2534,7 @@ Main() {
 }
 ```
 
-### 20.8 Enumerations
+### 22.8 Enumerations
 
 ```foobar
 enumerated Season {winter, spring, summer, autumn};
@@ -2309,7 +2558,7 @@ Main() {
 }
 ```
 
-### 20.9 Array Operations
+### 22.9 Array Operations
 
 ```foobar
 Main() {
@@ -2346,7 +2595,7 @@ Main() {
 }
 ```
 
-### 20.10 Complete Program Example
+### 22.10 Complete Program Example
 
 ```foobar
 // Student gradebook system

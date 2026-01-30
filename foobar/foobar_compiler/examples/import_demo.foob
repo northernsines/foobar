@@ -1,0 +1,38 @@
+// import_demo.foob - Demonstrates the FOOBAR import system
+
+import "math_lib.foob";
+import "string_utils.foob";
+
+Main() {
+    STRING_HELPER helper = new STRING_HELPER();
+    helper.PrintBanner("FOOBAR IMPORT SYSTEM DEMO");
+    
+    CONSOLE.Print("");
+    CONSOLE.Print("=== Math Library Demo ===");
+    
+    CALCULATOR calc = new CALCULATOR();
+    
+    integer sum = calc.Add(15, 27);
+    CONSOLE.Print("15 + 27 = " + sum.toString());
+    
+    integer product = calc.Multiply(6, 7);
+    CONSOLE.Print("6 * 7 = " + product.toString());
+    
+    CONSOLE.Print("Last result: " + calc.GetLastResult().toString());
+    
+    CONSOLE.Print("");
+    CONSOLE.Print("=== Geometry Demo ===");
+    
+    GEOMETRY geo = new GEOMETRY();
+    
+    integer area = geo.CalculateArea(10, 5);
+    CONSOLE.Print("Rectangle area (10x5): " + area.toString());
+    
+    integer circleArea = geo.CalculateCircleArea(5);
+    CONSOLE.Print("Circle area (radius=5): ~" + circleArea.toString());
+    
+    CONSOLE.Print("");
+    helper.PrintBanner("IMPORT DEMO COMPLETE!");
+    
+    return true;
+}
