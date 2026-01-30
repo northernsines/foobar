@@ -1944,7 +1944,43 @@ Strings also have instance methods that can be called directly:
 - Parses string as a float
 - Example: `float num = "3.14".toFloat();  // 3.14`
 
-### 22.4 ARRAY Class
+### 22.4 Type Conversions
+
+FOOBAR provides instance methods for converting between primitive types.
+
+#### Integer Instance Methods
+
+**num.toString() → string**
+- Converts integer to string
+- Example: `string str = 42.toString();  // "42"`
+
+**num.toFloat() → float**
+- Converts integer to float
+- Example: `float f = 42.toFloat();  // 42.0`
+
+#### Float Instance Methods
+
+**num.toString() → string**
+- Converts float to string
+- Example: `string str = 3.14.toString();  // "3.140000"`
+
+**num.toInteger() → integer**
+- Converts float to integer (truncates decimal part)
+- Example: `integer i = 3.14.toInteger();  // 3`
+- Note: This performs truncation, not rounding. Use `MATH.Round()` for rounding.
+
+#### Type Conversion Matrix
+
+| From Type | To Type | Method | Example |
+|-----------|---------|--------|---------|
+| string | integer | `.toInteger()` | `"42".toInteger()` → `42` |
+| string | float | `.toFloat()` | `"3.14".toFloat()` → `3.14` |
+| integer | string | `.toString()` | `42.toString()` → `"42"` |
+| integer | float | `.toFloat()` | `42.toFloat()` → `42.0` |
+| float | string | `.toString()` | `3.14.toString()` → `"3.14"` |
+| float | integer | `.toInteger()` | `3.14.toInteger()` → `3` (truncated) |
+
+### 22.5 ARRAY Class
 
 The ARRAY class provides static array utilities. Arrays also have built-in instance methods.
 
@@ -1996,7 +2032,7 @@ All array types support these methods:
 - Property containing array length
 - Example: `integer len = numbers.length;`
 
-### 22.5 DATETIME Class
+### 22.6 DATETIME Class
 
 The DATETIME class provides date and time functionality.
 
@@ -2033,7 +2069,7 @@ The DATETIME class provides date and time functionality.
 - Format codes: %Y (year), %m (month), %d (day), %H (hour), %M (minute), %S (second)
 - Example: `string formatted = DATETIME.Format(timestamp, "%Y-%m-%d");`
 
-### 22.6 RANDOM Class
+### 22.7 RANDOM Class
 
 The RANDOM class provides random number generation.
 
@@ -2057,7 +2093,7 @@ The RANDOM class provides random number generation.
 - Sets the random number generator seed for reproducible results
 - Example: `RANDOM.Seed(12345);`
 
-### 22.7 FILE Class
+### 22.8 FILE Class
 
 The FILE class provides file I/O operations.
 
