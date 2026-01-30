@@ -268,7 +268,7 @@ Get syntax highlighting, IntelliSense, code completion, and snippets for `.foob`
 
 ### Installation
 
-The VSIX package is already built and ready to install: `foobar-vscode-extension/foobar-language-2.0.0.vsix`
+The VSIX package is already built and ready to install: `foobar-vscode-extension/foobar-language-2.1.0.vsix`
 
 **Option 1: Quick Install (Recommended)**
 
@@ -289,7 +289,7 @@ The VSIX package is already built and ready to install: `foobar-vscode-extension
 1. Open VSCode
 2. Press `Cmd+Shift+P` (Mac) or `Ctrl+Shift+P` (Windows/Linux)
 3. Type "Install from VSIX" and select it
-4. Navigate to `foobar-vscode-extension/foobar-language-2.0.0.vsix` and select it
+4. Navigate to `foobar-vscode-extension/foobar-language-2.1.0.vsix` and select it
 5. Restart VSCode
 
 ### Features
