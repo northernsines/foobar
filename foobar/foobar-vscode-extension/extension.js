@@ -245,10 +245,10 @@ const STRING_INSTANCE_METHODS = {
         detail: 'string trim()',
         parameters: []
     },
-    'toInt': {
+    'toInteger': {
         signature: 'string.toInteger()',
         documentation: 'Parses string as integer',
-        detail: 'integer toInt()',
+        detail: 'integer toInteger()',
         parameters: []
     },
     'toFloat': {
