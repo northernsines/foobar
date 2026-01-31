@@ -153,15 +153,6 @@ class CCodeGenerator:
                 return left_type
             if right_type and '[]' in right_type:
                 return right_type
-            # Check if either operand is a string - string operations return strings
-            if left_type == 'string' or right_type == 'string':
-                return 'string'
-            # For comparison operators, return boolean
-            if expr.operator in ['==', '>', '<', '>=', '<=']:
-                return 'boolean'
-            # For logical operators, return boolean
-            if expr.operator in ['&', 'V', 'VV']:
-                return 'boolean'
             # For now, assume arithmetic returns integer
             return "integer"
         elif isinstance(expr, ArrayLiteral):
@@ -849,6 +840,20 @@ class CCodeGenerator:
         self.emit("char* result = (char*)malloc(32);")
         self.emit("sprintf(result, \"%f\", val);")
         self.emit("return result;")
+        self.dedent()
+        self.emit("}")
+        self.emit("")
+        
+        self.emit("float int_toFloat(int val) {")
+        self.indent()
+        self.emit("return (float)val;")
+        self.dedent()
+        self.emit("}")
+        self.emit("")
+        
+        self.emit("int float_toInteger(float val) {")
+        self.indent()
+        self.emit("return (int)val;")
         self.dedent()
         self.emit("}")
         self.emit("")
@@ -2140,11 +2145,15 @@ class CCodeGenerator:
                 if obj_type == 'integer':
                     if expr.method_name == 'toString':
                         return f"int_toString({obj})"
+                    if expr.method_name == 'toFloat':
+                        return f"int_toFloat({obj})"
                 
                 # Float instance methods
                 if obj_type == 'float':
                     if expr.method_name == 'toString':
                         return f"float_toString({obj})"
+                    if expr.method_name == 'toInteger':
+                        return f"float_toInteger({obj})"
                 
                 # Check if it's a parent method call
                 is_parent_call = isinstance(expr.object, Parent)
