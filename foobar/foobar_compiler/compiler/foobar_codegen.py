@@ -153,6 +153,15 @@ class CCodeGenerator:
                 return left_type
             if right_type and '[]' in right_type:
                 return right_type
+            # Check if either operand is a string - string operations return strings
+            if left_type == 'string' or right_type == 'string':
+                return 'string'
+            # For comparison operators, return boolean
+            if expr.operator in ['==', '>', '<', '>=', '<=']:
+                return 'boolean'
+            # For logical operators, return boolean
+            if expr.operator in ['&', 'V', 'VV']:
+                return 'boolean'
             # For now, assume arithmetic returns integer
             return "integer"
         elif isinstance(expr, ArrayLiteral):
@@ -844,16 +853,37 @@ class CCodeGenerator:
         self.emit("}")
         self.emit("")
         
-        self.emit("float int_toFloat(int val) {")
+        self.emit("char* bool_toString(bool val) {")
         self.indent()
-        self.emit("return (float)val;")
+        self.emit("return val ? \"true\" : \"false\";")
         self.dedent()
         self.emit("}")
         self.emit("")
         
-        self.emit("int float_toInteger(float val) {")
+        self.emit("char* char_toString(char val) {")
         self.indent()
-        self.emit("return (int)val;")
+        self.emit("char* result = (char*)malloc(2);")
+        self.emit("result[0] = val;")
+        self.emit("result[1] = '\\0';")
+        self.emit("return result;")
+        self.dedent()
+        self.emit("}")
+        self.emit("")
+        
+        self.emit("char* long_toString(long val) {")
+        self.indent()
+        self.emit("char* result = (char*)malloc(32);")
+        self.emit("sprintf(result, \"%ld\", val);")
+        self.emit("return result;")
+        self.dedent()
+        self.emit("}")
+        self.emit("")
+        
+        self.emit("char* double_toString(double val) {")
+        self.indent()
+        self.emit("char* result = (char*)malloc(32);")
+        self.emit("sprintf(result, \"%lf\", val);")
+        self.emit("return result;")
         self.dedent()
         self.emit("}")
         self.emit("")
@@ -2145,15 +2175,31 @@ class CCodeGenerator:
                 if obj_type == 'integer':
                     if expr.method_name == 'toString':
                         return f"int_toString({obj})"
-                    if expr.method_name == 'toFloat':
-                        return f"int_toFloat({obj})"
                 
                 # Float instance methods
                 if obj_type == 'float':
                     if expr.method_name == 'toString':
                         return f"float_toString({obj})"
-                    if expr.method_name == 'toInteger':
-                        return f"float_toInteger({obj})"
+                
+                # Boolean instance methods
+                if obj_type == 'boolean':
+                    if expr.method_name == 'toString':
+                        return f"bool_toString({obj})"
+                
+                # Character instance methods
+                if obj_type == 'character':
+                    if expr.method_name == 'toString':
+                        return f"char_toString({obj})"
+                
+                # Long integer instance methods
+                if obj_type == 'longinteger':
+                    if expr.method_name == 'toString':
+                        return f"long_toString({obj})"
+                
+                # Long float instance methods
+                if obj_type == 'longfloat':
+                    if expr.method_name == 'toString':
+                        return f"double_toString({obj})"
                 
                 # Check if it's a parent method call
                 is_parent_call = isinstance(expr.object, Parent)
