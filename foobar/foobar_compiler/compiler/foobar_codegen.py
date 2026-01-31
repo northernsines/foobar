@@ -153,6 +153,15 @@ class CCodeGenerator:
                 return left_type
             if right_type and '[]' in right_type:
                 return right_type
+            # Check if either operand is a string - string operations return strings
+            if left_type == 'string' or right_type == 'string':
+                return 'string'
+            # For comparison operators, return boolean
+            if expr.operator in ['==', '>', '<', '>=', '<=']:
+                return 'boolean'
+            # For logical operators, return boolean
+            if expr.operator in ['&', 'V', 'VV']:
+                return 'boolean'
             # For now, assume arithmetic returns integer
             return "integer"
         elif isinstance(expr, ArrayLiteral):
