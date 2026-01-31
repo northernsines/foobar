@@ -2136,6 +2136,8 @@ class CCodeGenerator:
             
             if expr.operator == 'not':
                 return f"(!{operand})"
+            elif expr.operator == '-':
+                return f"(-{operand})"
             elif expr.operator == '++':
                 return f"++{operand}" if expr.is_prefix else f"{operand}++"
             elif expr.operator == '--':
