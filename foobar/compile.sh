@@ -24,7 +24,7 @@ fi
 # Ask for the file
 echo "Enter the path to your .foob file:"
 echo "(or just the filename if it's in the current directory)"
-read -r FOOB_FILE
+read -e -r FOOB_FILE
 
 # Check if file exists
 if [ ! -f "$FOOB_FILE" ]; then
@@ -65,7 +65,7 @@ if [ $? -eq 0 ]; then
     if [ "$RUN_NOW" = "y" ] || [ "$RUN_NOW" = "Y" ]; then
         echo ""
         echo "--- Output ---"
-        "$EXECUTABLE"
+        "./$EXECUTABLE"
         echo "--- End ---"
     fi
 else
