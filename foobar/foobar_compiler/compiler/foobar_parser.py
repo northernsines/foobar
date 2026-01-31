@@ -35,18 +35,48 @@ class Parser:
             got = token.type.name.replace('_', ' ').lower()
             
             hint = ""
+            goose_suffix = ""
+            
+            # Silly goose for ALL punctuation and common errors! 🪿
             if token_type == TokenType.SEMICOLON:
-                hint = "\nDid you forget a semicolon (;) at the end of the statement?"
+                hint = "\n💡 Did you forget a semicolon (;) at the end of the statement?"
+                goose_suffix = "\n🪿 You silly goose!"
             elif token_type == TokenType.RPAREN:
-                hint = "\nDid you forget a closing parenthesis )?"
+                hint = "\n💡 Did you forget a closing parenthesis )?"
+                goose_suffix = "\n🪿 You silly goose!"
             elif token_type == TokenType.RBRACE:
-                hint = "\nDid you forget a closing brace }?"
+                hint = "\n💡 Did you forget a closing brace }?"
+                goose_suffix = "\n🪿 You silly goose!"
+            elif token_type == TokenType.LPAREN:
+                hint = "\n💡 Did you forget an opening parenthesis (?"
+                goose_suffix = "\n🪿 You silly goose!"
+            elif token_type == TokenType.LBRACE:
+                hint = "\n💡 Did you forget an opening brace {?"
+                goose_suffix = "\n🪿 You silly goose!"
+            elif token_type == TokenType.LBRACKET:
+                hint = "\n💡 Did you forget an opening bracket [?"
+                goose_suffix = "\n🪿 You silly goose!"
+            elif token_type == TokenType.RBRACKET:
+                hint = "\n💡 Did you forget a closing bracket ]?"
+                goose_suffix = "\n🪿 You silly goose!"
+            elif token_type == TokenType.COMMA:
+                hint = "\n💡 Did you forget a comma (,) to separate items?"
+                goose_suffix = "\n🪿 You silly goose!"
+            elif token_type == TokenType.DOT:
+                hint = "\n💡 Did you forget a dot (.) for member access?"
+                goose_suffix = "\n🪿 You silly goose!"
+            elif token_type == TokenType.COLON:
+                hint = "\n💡 Did you forget a colon (:)?"
+                goose_suffix = "\n🪿 You silly goose!"
+            elif token_type == TokenType.EQUALS:
+                hint = "\n💡 Did you mean to assign a value with '='?"
+                goose_suffix = "\n🪿 You silly goose!"
             elif token_type == TokenType.IDENTIFIER:
-                hint = "\nExpected a variable or function name here."
+                hint = "\n💡 Expected a variable or function name here."
             
             raise SyntaxError(
-                f"Syntax error at line {token.line}, column {token.column}\n"
-                f"Expected {expected}, but got {got}{hint}"
+                f"❌ Syntax error at line {token.line}, column {token.column}\n"
+                f"Expected {expected}, but got {got}{hint}{goose_suffix}"
             )
         self.advance()
         return token
@@ -167,7 +197,10 @@ class Parser:
                 members.append(self.parse_field(is_public))
             except:
                 # Couldn't parse as type, something's wrong
-                raise SyntaxError(f"Expected class member at {self.current_token().line}:{self.current_token().column}")
+                raise SyntaxError(
+                    f"❌ Invalid class member at line {self.current_token().line}, column {self.current_token().column}\n"
+                    f"💡 Expected a field or method declaration. Check your syntax!"
+                )
         
         self.expect(TokenType.RBRACE)
         return ClassDecl(name, parent_classes, members)
@@ -244,9 +277,9 @@ class Parser:
             self.advance()
         else:
             raise SyntaxError(
-                f"Type error at line {self.current_token().line}, column {self.current_token().column}\n"
-                f"Expected a type (like integer, boolean, string, or a class name), but got {self.current_token().type.name.lower()}\n"
-                f"Valid types: boolean, integer, longinteger, float, longfloat, string, character, void, or a class name"
+                f"❌ Type error at line {self.current_token().line}, column {self.current_token().column}\n"
+                f"Expected a type (like integer, boolean, string, or a class name), but got '{self.current_token().type.name.lower()}'\n"
+                f"💡 Valid types: boolean, integer, longinteger, float, longfloat, string, character, void, or a class name"
             )
         
         # Check for array type
@@ -356,8 +389,9 @@ class Parser:
             return LoopUntilStmt(condition, body)
         
         raise SyntaxError(
-            f"Expected 'for' or 'until' after 'loop' at "
-            f"{self.current_token().line}:{self.current_token().column}"
+            f"❌ Loop syntax error at line {self.current_token().line}, column {self.current_token().column}\n"
+            f"💡 Expected 'for' or 'until' after 'loop'\n"
+            f"Example: loop for(10) {{ ... }} or loop until(condition) {{ ... }}"
         )
     
     def parse_expression(self) -> Expression:
@@ -685,8 +719,9 @@ class Parser:
             return Identifier(name)
         
         raise SyntaxError(
-            f"Unexpected token {self.current_token().type.name} "
-            f"at {self.current_token().line}:{self.current_token().column}"
+            f"❌ Unexpected token '{self.current_token().type.name.lower()}' "
+            f"at line {self.current_token().line}, column {self.current_token().column}\n"
+            f"💡 This doesn't look like a valid expression or statement"
         )
 
 # Test the parser
